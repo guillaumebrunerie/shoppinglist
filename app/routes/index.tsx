@@ -1,17 +1,17 @@
 import * as React from "react";
 
-import { useLoaderData, useFetcher } from "@remix-run/react";
-import { json, type LoaderFunction } from "@remix-run/node";
+import { useLoaderData, useFetcher, useSubmit, Link } from "@remix-run/react";
+import { json, redirect, type LoaderFunction } from "@remix-run/node";
 import { getList, type Item } from "~/models/lists.server";
 
 type LoaderData = {
-  items: Item[],
+  list: Item[] | null,
 }
 
 export const loader: LoaderFunction = async () => {
   const id = "testList";
-  const items = await getList({id});
-  return json<LoaderData>({items});
+  const list = await getList({id});
+  return json<LoaderData>({list});
 }
 
 const DeleteButton = (props: React.ComponentProps<"div">) => {
@@ -94,10 +94,10 @@ const AddItem = () => {
   )
 }
 
-const ShoppingList = ({items}: {items: Item[]}) => {
+const ShoppingList = ({list}: {list: Item[]}) => {
   return (
     <ul className="flex flex-col place-items-stretch select-none">
-      {items.map(item => <ItemRow key={item.id} item={item}/>)}
+      {list.map(item => <ItemRow key={item.id} item={item}/>)}
       <AddItem/>
     </ul>
   )
@@ -105,7 +105,18 @@ const ShoppingList = ({items}: {items: Item[]}) => {
 
 export default function MainPage() {
   const data = useLoaderData<LoaderData>();
+  const list = data.list;
+  const submit = useSubmit();
+  const handleClick = () => {
+    submit(null, {method: "post", action: "create"});
+  }
+
+  if (!list) {
+    return (
+      <button onClick={handleClick}>Create list</button>
+    );
+  }
   return (
-    <ShoppingList items={data.items}/>
+    <ShoppingList list={list}/>
   )
 }
