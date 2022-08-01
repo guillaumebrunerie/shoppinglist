@@ -1,0 +1,54 @@
+[18:34:20.185] Global cache location '/home/fractal/.cache/typescript/4.7', safe file path '/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/typingSafeList.json', types map path /home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/typesMap.json
+[18:34:20.189] Processing cache location '/home/fractal/.cache/typescript/4.7'
+[18:34:20.190] Trying to find '/home/fractal/.cache/typescript/4.7/package.json'...
+[18:34:20.191] Loaded content of '/home/fractal/.cache/typescript/4.7/package.json': {"private":true,"dependencies":{"types-registry":"^0.1.603"},"devDependencies":{"@types/babel__code-frame":"^7.0.3","@types/babel__core":"^7.1.19","@types/babel__generator":"^7.6.4","@types/babel__template":"^7.4.1","@types/babel__traverse":"^7.17.1","@types/bcryptjs":"^2.4.2","@types/eslint":"^8.4.2","@types/eslint-config-prettier":"^6.11.0","@types/inherits":"^0.0.30","@types/object-assign":"^4.0.30","@types/prettier":"^2.6.3","@types/react":"^18.0.11","@types/react-dom":"^18.0.5","@types/semver":"^7.3.9","@types/tailwindcss":"^3.0.10","@types/testing-library__jest-dom":"^5.14.3"}}
+[18:34:20.192] Loaded content of '/home/fractal/.cache/typescript/4.7/package-lock.json'
+[18:34:20.218] Adding entry into typings cache: 'babel__code-frame' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/babel__code-frame/index.d.ts'
+[18:34:20.224] Adding entry into typings cache: 'babel__core' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/babel__core/index.d.ts'
+[18:34:20.229] Adding entry into typings cache: 'babel__generator' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/babel__generator/index.d.ts'
+[18:34:20.233] Adding entry into typings cache: 'babel__template' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/babel__template/index.d.ts'
+[18:34:20.238] Adding entry into typings cache: 'babel__traverse' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/babel__traverse/index.d.ts'
+[18:34:20.241] Adding entry into typings cache: 'bcryptjs' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/bcryptjs/index.d.ts'
+[18:34:20.247] Adding entry into typings cache: 'eslint' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/eslint/index.d.ts'
+[18:34:20.257] Adding entry into typings cache: 'eslint-config-prettier' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/eslint-config-prettier/index.d.ts'
+[18:34:20.266] Adding entry into typings cache: 'inherits' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/inherits/index.d.ts'
+[18:34:20.268] Adding entry into typings cache: 'object-assign' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/object-assign/index.d.ts'
+[18:34:20.273] Adding entry into typings cache: 'prettier' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/prettier/index.d.ts'
+[18:34:20.290] Adding entry into typings cache: 'react' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/react/index.d.ts'
+[18:34:20.295] Adding entry into typings cache: 'react-dom' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/react-dom/index.d.ts'
+[18:34:20.300] Adding entry into typings cache: 'semver' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/semver/index.d.ts'
+[18:34:20.303] Adding entry into typings cache: 'tailwindcss' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/tailwindcss/index.d.ts'
+[18:34:20.304] Adding entry into typings cache: 'testing-library__jest-dom' => '/home/fractal/.cache/typescript/4.7/node_modules/@types/testing-library__jest-dom/index.d.ts'
+[18:34:20.305] Finished processing cache location '/home/fractal/.cache/typescript/4.7'
+[18:34:20.305] Process id: 103072
+[18:34:20.305] NPM location: /usr/bin/npm (explicit '--npmLocation' not  provided)
+[18:34:20.305] validateDefaultNpmLocation: false
+[18:34:20.306] Npm config file: /home/fractal/.cache/typescript/4.7/package.json
+[18:34:20.307] Updating types-registry npm package...
+[18:34:20.307] Exec: /usr/bin/npm install --ignore-scripts types-registry@latest
+[18:34:22.096]     Succeeded. stdout:
+    
+    up to date, audited 43 packages in 1s
+
+3 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+[18:34:22.096] Updated types-registry npm package
+[18:34:28.839] Got install request {"projectName":"/dev/null/inferredProject1*","fileNames":["/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es5.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2016.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.dom.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.dom.iterable.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.webworker.importscripts.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.scripthost.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.core.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.collection.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.generator.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.iterable.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.promise.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.proxy.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.reflect.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.symbol.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2016.array.include.d.ts","/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/lib.es2016.full.d.ts","/home/fractal/Dropbox/Javascript/shoppinglist/prisma/seed.js"],"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true,"maxNodeModuleJsDepth":2},"typeAcquisition":{"enable":true,"include":[],"exclude":[]},"unresolvedImports":[],"projectRootPath":"/home/fractal/Dropbox/Javascript/shoppinglist/prisma","kind":"discover"}
+[18:34:28.877] Loaded safelist from types map file '/home/fractal/.emacs.d/.cache/lsp/npm/typescript/lib/node_modules/typescript/lib/typesMap.json'
+[18:34:28.884] Explicitly included types: []
+[18:34:28.888] Inferred typings from unresolved imports: []
+[18:34:28.888] Result: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/fractal/Dropbox/Javascript/shoppinglist/prisma/bower_components","/home/fractal/Dropbox/Javascript/shoppinglist/prisma/node_modules"]}
+[18:34:28.889] Finished typings discovery: {"cachedTypingPaths":[],"newTypingNames":[],"filesToWatch":["/home/fractal/Dropbox/Javascript/shoppinglist/prisma/bower_components","/home/fractal/Dropbox/Javascript/shoppinglist/prisma/node_modules"]}
+[18:34:28.894] DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/bower_components
+[18:34:28.897] DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/bower_components 1 undefined Project: /dev/null/inferredProject1* watcher already invoked: false
+[18:34:28.910] Elapsed:: 11.576364010572433ms DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/bower_components 1 undefined Project: /dev/null/inferredProject1* watcher already invoked: false
+[18:34:28.911] DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/node_modules
+[18:34:28.911] DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/node_modules 1 undefined Project: /dev/null/inferredProject1* watcher already invoked: false
+[18:34:28.911] Elapsed:: 0.619159996509552ms DirectoryWatcher:: Added:: WatchInfo: /home/fractal/Dropbox/Javascript/shoppinglist/prisma/node_modules 1 undefined Project: /dev/null/inferredProject1* watcher already invoked: false
+[18:34:28.913] Sending response:
+    {"projectName":"/dev/null/inferredProject1*","typeAcquisition":{"enable":true,"include":[],"exclude":[]},"compilerOptions":{"module":1,"target":3,"jsx":1,"allowJs":true,"allowSyntheticDefaultImports":true,"allowNonTsExtensions":true,"noEmitForJsFiles":true,"maxNodeModuleJsDepth":2},"typings":[],"unresolvedImports":[],"kind":"action::set"}
+[18:34:28.917] Response has been sent.
+[18:34:28.917] No new typings were requested as a result of typings discovery
