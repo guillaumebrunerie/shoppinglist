@@ -40,7 +40,7 @@ async function seed() {
     },
   });
 
-  const shoppingList = await prisma.shoppingList.create({
+  await prisma.shoppingList.create({
     data: {
       id: "shoppingList",
     }

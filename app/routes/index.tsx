@@ -1,8 +1,6 @@
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { json, type LoaderFunction } from "@remix-run/node";
 import { getList, type Item } from "~/models/lists.server";
-
-import { useOptionalUser } from "~/utils";
 
 type LoaderData = {
   items: Item[],
