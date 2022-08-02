@@ -1,12 +1,12 @@
-Reordering of items
-Editing items
+Main page with a list of accessed lists
 Better delete button
 Deal with long texts
-Main page with a list of accessed lists and possibility to remove/reorder them
-Theme support
-Name of lists
-Favicon/name
-PWA
+PWA + Favicon
+Reordering of items
+Editing items
+Custom color support
+Possibility to remove/reorder main page
+
 Folders
 
 x Websocket support

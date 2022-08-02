@@ -75,39 +75,26 @@ const AddItem = () => {
 	const params = useParams();
 	const listId = params.listId as string;
 	const fetcher = useFetcher();
-	const [editing, setEditing] = React.useState<string | null>(null);
+	const [text, setText] = React.useState("");
 
 	const doAdd = () => {
-		if (editing === null) {
-			return;
-		}
+		if (!text) return;
 		socket?.emit("update", listId);
 		fetcher.submit(
-			{ item: editing },
+			{ item: text },
 			{ method: "post", action: `${listId}/add` }
 		);
-		setEditing("");
+		setText("");
 	};
 
-	const handleClick = () => {
-		if (editing === null) {
-			setEditing("");
-		}
-	};
 	const handleChange = (event: React.ChangeEvent) => {
-		setEditing((event.target as HTMLInputElement).value);
+		setText((event.target as HTMLInputElement).value);
 	};
 	const handleKeyDown = (event: React.KeyboardEvent) => {
 		switch (event.key) {
-			case "Escape":
-				setEditing(null);
 			case "Enter":
 				doAdd();
 		}
-	};
-	const handleBlur = () => {
-		doAdd();
-		setEditing(null);
 	};
 
 	const placeholder = "Ajouter…";
@@ -115,21 +102,15 @@ const AddItem = () => {
 	return (
 		<li
 			className="flex h-16 cursor-pointer items-center border border-black bg-blue-700 text-2xl text-slate-300"
-			onClick={handleClick}
 		>
-			{editing !== null ? (
-				<input
-					autoFocus
-					placeholder={placeholder}
-					onBlur={handleBlur}
-					value={editing}
-					onChange={handleChange}
-					onKeyDown={handleKeyDown}
-					className="mx-4 w-4/5 select-text text-black"
-				/>
-			) : (
-				<span className="ml-4">{placeholder}</span>
-			)}
+			<input
+				autoFocus
+				placeholder={placeholder}
+				value={text}
+				onChange={handleChange}
+				onKeyDown={handleKeyDown}
+				className="mx-4 w-4/5 select-text text-black"
+			/>
 		</li>
 	);
 };
@@ -164,6 +145,15 @@ export default function MainPage() {
 			}
 		});
 	}, [socket, fetcherLoad, listId]);
+
+	// Add the listId to local storage
+	React.useEffect(() => {
+		let knownLists = JSON.parse(localStorage.getItem("knownLists") || JSON.stringify([listId]));
+		if (!knownLists.includes(listId)) {
+			knownLists.push(listId);
+		}
+		localStorage.setItem("knownLists", JSON.stringify(knownLists));
+	});
 
 	const handleClick = () => {
 		submit(null, { method: "post", action: `${listId}/create` });
