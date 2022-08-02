@@ -21,8 +21,15 @@ export const loader: LoaderFunction = async ({ params }) => {
 	return json<LoaderData>({ listId, list });
 };
 
-const DeleteButton = (props: React.ComponentProps<"div">) => {
-	return <div className="mr-2 h-10 w-10 flex-none bg-red-900" {...props} />;
+const DeleteButton = (props: React.ComponentProps<"svg">) => {
+	return (
+		<svg viewBox="-100 -100 100 100" preserveAspectRatio="xMidYMid slice" role="img" {...props}>
+			<title>Supprimer cet élément</title>
+			<path d="M -50 -50 L 50 50 M -50 50 L 50 -50" strokeWidth="3" stroke="red"/>
+		</svg>
+	)
+
+	// return <div className="mr-2 h-10 w-10 flex-none bg-red-900" {...props} />;
 };
 
 const ItemRow = ({ item }: { item: Item }) => {

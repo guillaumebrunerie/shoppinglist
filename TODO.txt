@@ -1,12 +1,12 @@
-Main page with a list of accessed lists
 Better delete button
 Deal with long texts
 PWA + Favicon
+Improve styling
 Reordering of items
 Editing items
 Custom color support
 Possibility to remove/reorder main page
-
 Folders
 
 x Websocket support
+x Main page with a list of accessed lists
