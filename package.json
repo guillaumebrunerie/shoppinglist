@@ -5,7 +5,7 @@
 	"scripts": {
 		"build": "run-s build:*",
 		"build:css": "npm run generate:css -- --minify",
-		"build:remix": "remix build",
+		"build:remix": "remix-serve build",
 		"dev": "run-p dev:*",
 		"dev:css": "npm run generate:css -- --watch",
 		"dev:remix": "cross-env NODE_ENV=development binode --require ./mocks -- @remix-run/dev:remix watch",
