@@ -1,4 +1,3 @@
-Better delete button
 Deal with long texts
 PWA + Favicon
 Improve styling
@@ -8,5 +7,6 @@ Custom color support
 Possibility to remove/reorder main page
 Folders
 
-x Websocket support
+x Better delete button
 x Main page with a list of accessed lists
+x Websocket support

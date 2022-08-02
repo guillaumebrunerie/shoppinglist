@@ -23,9 +23,9 @@ export const loader: LoaderFunction = async ({ params }) => {
 
 const DeleteButton = (props: React.ComponentProps<"svg">) => {
 	return (
-		<svg viewBox="-100 -100 100 100" preserveAspectRatio="xMidYMid slice" role="img" {...props}>
+		<svg className="h-10 w-10 flex-none mr-2 cursor-pointer" viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid slice" role="img" {...props}>
 			<title>Supprimer cet élément</title>
-			<path d="M -50 -50 L 50 50 M -50 50 L 50 -50" strokeWidth="3" stroke="red"/>
+			<path d="M -70 -70 L 70 70 M -70 70 L 70 -70" strokeWidth="20" stroke="#C00" strokeLinecap="round"/>
 		</svg>
 	)
 
@@ -60,12 +60,12 @@ const ItemRow = ({ item }: { item: Item }) => {
 			className={
 				bg +
 				submitting +
-				"flex h-16 items-center border border-black text-2xl"
+				"flex min-h-[4rem] items-center border border-black text-2xl"
 			}
 		>
 			<span
 				className={
-					"ml-2 flex-auto text-slate-300 " +
+					"ml-2 flex-auto text-slate-300 cursor-pointer " +
 					(item.completed ? "text-slate-500 line-through" : "")
 				}
 				onClick={handleCheck}
