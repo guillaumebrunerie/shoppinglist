@@ -1,38 +1,61 @@
+import * as React from "react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
+	Links,
+	LiveReload,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
 } from "@remix-run/react";
+import io, { type Socket } from "socket.io-client";
+import { SocketProvider } from "./context";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+	return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
 };
 
 export const meta: MetaFunction = () => ({
-  charset: "utf-8",
-  title: "Remix Notes",
-  viewport: "width=device-width,initial-scale=1",
+	charset: "utf-8",
+	title: "Listes de courses",
+	viewport: "width=device-width,initial-scale=1",
 });
 
 export default function App() {
-  return (
-    <html lang="en" className="h-full">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body className="h-full">
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
-  );
+	const [socket, setSocket] = React.useState<Socket>();
+
+	React.useEffect(() => {
+		console.log("connecting");
+		const socket = io();
+		setSocket(socket);
+		return () => {
+			socket.close();
+		};
+	}, []);
+
+	React.useEffect(() => {
+		if (!socket) return;
+		socket.on("confirmation", (data) => {
+			console.log(data);
+		});
+	}, [socket]);
+
+	return (
+		<html lang="en" className="h-full">
+			<head>
+				<Meta />
+				<Links />
+			</head>
+			<body className="h-full">
+				<SocketProvider socket={socket}>
+					<Outlet />
+				</SocketProvider>
+				<ScrollRestoration />
+				<Scripts />
+				<LiveReload />
+			</body>
+		</html>
+	);
 }

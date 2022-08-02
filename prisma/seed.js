@@ -4,78 +4,78 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function seed() {
-  // const email = "rachel@remix.run";
+	// const email = "rachel@remix.run";
 
-  // // cleanup the existing database
-  // await prisma.user.delete({ where: { email } }).catch(() => {
-  //   // no worries if it doesn't exist yet
-  // });
+	// // cleanup the existing database
+	// await prisma.user.delete({ where: { email } }).catch(() => {
+	//   // no worries if it doesn't exist yet
+	// });
 
-  // const hashedPassword = await bcrypt.hash("racheliscool", 10);
+	// const hashedPassword = await bcrypt.hash("racheliscool", 10);
 
-  // const user = await prisma.user.create({
-  //   data: {
-  //     email,
-  //     password: {
-  //       create: {
-  //         hash: hashedPassword,
-  //       },
-  //     },
-  //   },
-  // });
+	// const user = await prisma.user.create({
+	//   data: {
+	//     email,
+	//     password: {
+	//       create: {
+	//         hash: hashedPassword,
+	//       },
+	//     },
+	//   },
+	// });
 
-  // await prisma.note.create({
-  //   data: {
-  //     title: "My first note",
-  //     body: "Hello, world!",
-  //     userId: user.id,
-  //   },
-  // });
+	// await prisma.note.create({
+	//   data: {
+	//     title: "My first note",
+	//     body: "Hello, world!",
+	//     userId: user.id,
+	//   },
+	// });
 
-  // await prisma.note.create({
-  //   data: {
-  //     title: "My second note",
-  //     body: "Hello, world!",
-  //     userId: user.id,
-  //   },
-  // });
+	// await prisma.note.create({
+	//   data: {
+	//     title: "My second note",
+	//     body: "Hello, world!",
+	//     userId: user.id,
+	//   },
+	// });
 
-  await prisma.list.create({
-    data: {
-      id: "testList",
-    }
-  });
+	await prisma.list.create({
+		data: {
+			id: "testList",
+		},
+	});
 
-  await prisma.item.create({
-    data: {
-      listId: "testList",
-      order: 0,
-      value: "Tomatoes",
-    }
-  });
-  await prisma.item.create({
-    data: {
-      listId: "testList",
-      order: 1,
-      value: "Carrots",
-    }
-  });
-  await prisma.item.create({
-    data: {
-      listId: "testList",
-      order: 2,
-      value: "Watermelon",
-    }
-  });
+	await prisma.item.create({
+		data: {
+			listId: "testList",
+			order: 0,
+			value: "Tomatoes",
+		},
+	});
+	await prisma.item.create({
+		data: {
+			listId: "testList",
+			order: 1,
+			value: "Carrots",
+		},
+	});
+	await prisma.item.create({
+		data: {
+			listId: "testList",
+			order: 2,
+			value: "Watermelon",
+		},
+	});
 
-  console.log(`Database has been seeded. 🌱`);
+	console.log(`Database has been seeded. 🌱`);
 }
 
 seed()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+	.catch((e) => {
+		console.error(e);
+		process.exit(1);
+	})
+	.finally(async () => {
+		await prisma.$disconnect();
+	});

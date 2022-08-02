@@ -10,19 +10,19 @@ npx create-remix --template remix-run/indie-stack
 
 ## What's in the stack
 
-- [Fly app deployment](https://fly.io) with [Docker](https://www.docker.com/)
-- Production-ready [SQLite Database](https://sqlite.org)
-- Healthcheck endpoint for [Fly backups region fallbacks](https://fly.io/docs/reference/configuration/#services-http_checks)
-- [GitHub Actions](https://github.com/features/actions) for deploy on merge to production and staging environments
-- Email/Password Authentication with [cookie-based sessions](https://remix.run/docs/en/v1/api/remix#createcookiesessionstorage)
-- Database ORM with [Prisma](https://prisma.io)
-- Styling with [Tailwind](https://tailwindcss.com/)
-- End-to-end testing with [Cypress](https://cypress.io)
-- Local third party request mocking with [MSW](https://mswjs.io)
-- Unit testing with [Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com)
-- Code formatting with [Prettier](https://prettier.io)
-- Linting with [ESLint](https://eslint.org)
-- Static Types with [TypeScript](https://typescriptlang.org)
+-   [Fly app deployment](https://fly.io) with [Docker](https://www.docker.com/)
+-   Production-ready [SQLite Database](https://sqlite.org)
+-   Healthcheck endpoint for [Fly backups region fallbacks](https://fly.io/docs/reference/configuration/#services-http_checks)
+-   [GitHub Actions](https://github.com/features/actions) for deploy on merge to production and staging environments
+-   Email/Password Authentication with [cookie-based sessions](https://remix.run/docs/en/v1/api/remix#createcookiesessionstorage)
+-   Database ORM with [Prisma](https://prisma.io)
+-   Styling with [Tailwind](https://tailwindcss.com/)
+-   End-to-end testing with [Cypress](https://cypress.io)
+-   Local third party request mocking with [MSW](https://mswjs.io)
+-   Unit testing with [Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com)
+-   Code formatting with [Prettier](https://prettier.io)
+-   Linting with [ESLint](https://eslint.org)
+-   Static Types with [TypeScript](https://typescriptlang.org)
 
 Not a fan of bits of the stack? Fork it, change it, and use `npx create-remix --template your/repo`! Make it your own.
 
@@ -34,38 +34,38 @@ Click this button to create a [Gitpod](https://gitpod.io) workspace with the pro
 
 ## Development
 
-- This step only applies if you've opted out of having the CLI install dependencies for you:
+-   This step only applies if you've opted out of having the CLI install dependencies for you:
 
-  ```sh
-  npx remix init
-  ```
+    ```sh
+    npx remix init
+    ```
 
-- Initial setup: _If you just generated this project, this step has been done for you._
+-   Initial setup: _If you just generated this project, this step has been done for you._
 
-  ```sh
-  npm run setup
-  ```
+    ```sh
+    npm run setup
+    ```
 
-- Start dev server:
+-   Start dev server:
 
-  ```sh
-  npm run dev
-  ```
+    ```sh
+    npm run dev
+    ```
 
 This starts your app in development mode, rebuilding assets on file changes.
 
 The database seed script creates a new user with some data you can use to get started:
 
-- Email: `rachel@remix.run`
-- Password: `racheliscool`
+-   Email: `rachel@remix.run`
+-   Password: `racheliscool`
 
 ### Relevant code:
 
 This is a pretty simple note-taking app, but it's a good example of how you can build a full stack app with Prisma and Remix. The main functionality is creating users, logging in and out, and creating and deleting notes.
 
-- creating users, and logging in and out [./app/models/user.server.ts](./app/models/user.server.ts)
-- user sessions, and verifying them [./app/session.server.ts](./app/session.server.ts)
-- creating, and deleting notes [./app/models/note.server.ts](./app/models/note.server.ts)
+-   creating users, and logging in and out [./app/models/user.server.ts](./app/models/user.server.ts)
+-   user sessions, and verifying them [./app/session.server.ts](./app/session.server.ts)
+-   creating, and deleting notes [./app/models/note.server.ts](./app/models/note.server.ts)
 
 ## Deployment
 
@@ -73,54 +73,54 @@ This Remix Stack comes with two GitHub Actions that handle automatically deployi
 
 Prior to your first deployment, you'll need to do a few things:
 
-- [Install Fly](https://fly.io/docs/getting-started/installing-flyctl/)
+-   [Install Fly](https://fly.io/docs/getting-started/installing-flyctl/)
 
-- Sign up and log in to Fly
+-   Sign up and log in to Fly
 
-  ```sh
-  fly auth signup
-  ```
+    ```sh
+    fly auth signup
+    ```
 
-  > **Note:** If you have more than one Fly account, ensure that you are signed into the same account in the Fly CLI as you are in the browser. In your terminal, run `fly auth whoami` and ensure the email matches the Fly account signed into the browser.
+    > **Note:** If you have more than one Fly account, ensure that you are signed into the same account in the Fly CLI as you are in the browser. In your terminal, run `fly auth whoami` and ensure the email matches the Fly account signed into the browser.
 
-- Create two apps on Fly, one for staging and one for production:
+-   Create two apps on Fly, one for staging and one for production:
 
-  ```sh
-  fly apps create shoppinglist-ccba
-  fly apps create shoppinglist-ccba-staging
-  ```
+    ```sh
+    fly apps create shoppinglist-ccba
+    fly apps create shoppinglist-ccba-staging
+    ```
 
-  > **Note:** Make sure this name matches the `app` set in your `fly.toml` file. Otherwise, you will not be able to deploy.
+    > **Note:** Make sure this name matches the `app` set in your `fly.toml` file. Otherwise, you will not be able to deploy.
 
-  - Initialize Git.
+    -   Initialize Git.
 
-  ```sh
-  git init
-  ```
+    ```sh
+    git init
+    ```
 
-- Create a new [GitHub Repository](https://repo.new), and then add it as the remote for your project. **Do not push your app yet!**
+-   Create a new [GitHub Repository](https://repo.new), and then add it as the remote for your project. **Do not push your app yet!**
 
-  ```sh
-  git remote add origin <ORIGIN_URL>
-  ```
+    ```sh
+    git remote add origin <ORIGIN_URL>
+    ```
 
-- Add a `FLY_API_TOKEN` to your GitHub repo. To do this, go to your user settings on Fly and create a new [token](https://web.fly.io/user/personal_access_tokens/new), then add it to [your repo secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) with the name `FLY_API_TOKEN`.
+-   Add a `FLY_API_TOKEN` to your GitHub repo. To do this, go to your user settings on Fly and create a new [token](https://web.fly.io/user/personal_access_tokens/new), then add it to [your repo secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) with the name `FLY_API_TOKEN`.
 
-- Add a `SESSION_SECRET` to your fly app secrets, to do this you can run the following commands:
+-   Add a `SESSION_SECRET` to your fly app secrets, to do this you can run the following commands:
 
-  ```sh
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app shoppinglist-ccba
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app shoppinglist-ccba-staging
-  ```
+    ```sh
+    fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app shoppinglist-ccba
+    fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app shoppinglist-ccba-staging
+    ```
 
-  If you don't have openssl installed, you can also use [1password](https://1password.com/password-generator/) to generate a random secret, just replace `$(openssl rand -hex 32)` with the generated secret.
+    If you don't have openssl installed, you can also use [1password](https://1password.com/password-generator/) to generate a random secret, just replace `$(openssl rand -hex 32)` with the generated secret.
 
-- Create a persistent volume for the sqlite database for both your staging and production environments. Run the following:
+-   Create a persistent volume for the sqlite database for both your staging and production environments. Run the following:
 
-  ```sh
-  fly volumes create data --size 1 --app shoppinglist-ccba
-  fly volumes create data --size 1 --app shoppinglist-ccba-staging
-  ```
+    ```sh
+    fly volumes create data --size 1 --app shoppinglist-ccba
+    fly volumes create data --size 1 --app shoppinglist-ccba-staging
+    ```
 
 Now that everything is set up you can commit and push your changes to your repo. Every commit to your `main` branch will trigger a deployment to your production environment, and every commit to your `dev` branch will trigger a deployment to your staging environment.
 
@@ -157,7 +157,7 @@ We also have a utility to auto-delete the user at the end of your test. Just mak
 
 ```ts
 afterEach(() => {
-  cy.cleanupUser();
+	cy.cleanupUser();
 });
 ```
 

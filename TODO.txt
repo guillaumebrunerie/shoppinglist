@@ -1,0 +1,11 @@
+Websocket support
+Reordering of items
+Editing items
+Better delete button
+Deal with long texts
+Main page with a list of accessed lists and possibility to remove/reorder them
+Theme support
+Name of lists
+Favicon/name
+PWA
+Support folders
