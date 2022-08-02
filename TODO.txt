@@ -7,6 +7,6 @@ Theme support
 Name of lists
 Favicon/name
 PWA
-Support folders
+Folders
 
 x Websocket support
