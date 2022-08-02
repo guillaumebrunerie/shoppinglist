@@ -8,12 +8,12 @@
 		"build:remix": "remix build",
 		"dev": "run-p dev:*",
 		"dev:css": "npm run generate:css -- --watch",
-		"dev:remix": "cross-env NODE_ENV=development binode --require ./mocks -- @remix-run/dev:remix dev",
+		"dev:remix": "cross-env NODE_ENV=development binode --require ./mocks -- @remix-run/dev:remix watch",
+		"dev:node": "cross-env NODE_ENV=development node server/index.js --watch server/index.js",
 		"format": "prettier --write .",
 		"generate:css": "tailwindcss -o ./app/styles/tailwind.css",
 		"lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
 		"setup": "prisma generate && prisma migrate deploy && prisma db seed",
-		"start": "remix build",
 		"start:mocks": "binode --require ./mocks -- @remix-run/serve:remix-serve build",
 		"test": "vitest",
 		"test:e2e:dev": "start-server-and-test dev http://localhost:3000 \"npx cypress open\"",
@@ -21,8 +21,7 @@
 		"test:e2e:run": "cross-env PORT=8811 start-server-and-test start:mocks http://localhost:8811 \"npx cypress run\"",
 		"typecheck": "tsc -b && tsc -b cypress",
 		"validate": "run-p \"test -- --run\" lint typecheck test:e2e:run",
-		"serverstart": "cross-env NODE_ENV=production node server/index.js",
-		"serverstart:dev": "cross-env NODE_ENV=development node server/index.js"
+		"start": "cross-env NODE_ENV=production node server/index.js"
 	},
 	"prettier": {
 		"useTabs": true,

@@ -7,6 +7,5 @@
 
 set -ex
 npx prisma migrate deploy
-npm run start &
-sleep 5
-npm run serverstart
+npm run build
+npm run start
