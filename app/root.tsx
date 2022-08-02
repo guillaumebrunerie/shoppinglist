@@ -1,4 +1,3 @@
-import React from 'react';
 import { useLocation, useMatches } from '@remix-run/react';
 import * as React from "react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
@@ -12,8 +11,8 @@ import {
 } from "@remix-run/react";
 import io, { type Socket } from "socket.io-client";
 import { SocketProvider } from "./context";
-let isMount = true;
 import tailwindStylesheetUrl from "./styles/tailwind.css";
+let isMount = true;
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
 };
@@ -77,10 +76,9 @@ export default function App() {
 
   return (
     <html lang="en" className="h-full">
-       
       <head>
-         
-        <Meta /> <Links /> 
+          <Meta />
+		  <Links />
       </head> 
       <body className="h-full bg-slate-500">
          
