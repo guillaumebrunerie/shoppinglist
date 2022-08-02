@@ -8,4 +8,5 @@
 set -ex
 npx prisma migrate deploy
 npm run start &
+wait 3000
 npm run serverstart

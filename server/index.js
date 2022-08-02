@@ -10,11 +10,11 @@ const { createRequestHandler } = require("@remix-run/express");
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "./build");
 
-if (!fs.existsSync(BUILD_DIR)) {
-  console.warn(
-    "Build directory doesn't exist, please run `npm run dev` or `npm run build` before starting the server."
-  );
-}
+// if (!fs.existsSync(BUILD_DIR)) {
+//   console.warn(
+//     "Build directory doesn't exist, please run `npm run dev` or `npm run build` before starting the server."
+//   );
+// }
 
 const app = express();
 
