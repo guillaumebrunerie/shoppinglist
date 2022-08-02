@@ -1,4 +1,3 @@
-Deal with long texts
 PWA + Favicon
 Improve styling
 Reordering of items
@@ -7,6 +6,7 @@ Custom color support
 Possibility to remove/reorder main page
 Folders
 
+x Deal with long texts
 x Better delete button
 x Main page with a list of accessed lists
 x Websocket support
