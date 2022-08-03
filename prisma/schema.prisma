@@ -9,8 +9,8 @@ generator client {
 
 model List {
   id    String @id @default(cuid())
-  // name  String
-  // theme String @default("default")
+  name  String @default("Liste de courses")
+  theme String @default("default")
   items Item[]
 }
 
