@@ -78,6 +78,7 @@ export default function App() {
     <html lang="en" className="h-full">
       <head>
           <Meta />
+		  <link rel="manifest" href="/resources/manifest.webmanifest" />
 		  <Links />
       </head> 
       <body className="h-full bg-slate-500">
