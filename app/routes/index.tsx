@@ -23,7 +23,7 @@ export default function MainPage() {
 	const [knownLists, setKnownLists] = React.useState<string[] | null>(null);
 	React.useEffect(() => {
 		// TODO: remove hacky default
-		setKnownLists(JSON.parse(localStorage.getItem("knownLists") || "[testList]"));
+		setKnownLists(JSON.parse(localStorage.getItem("knownLists") || "[\"testList\"]"));
 	}, []);
 
 	if (knownLists === null) return null;
