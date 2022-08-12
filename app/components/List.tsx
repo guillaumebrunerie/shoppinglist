@@ -400,7 +400,7 @@ const SSubList = styled.svg`
 	}
 `
 
-const AddSubListSVG = (props) => (
+const AddSubListSVG = (props: {onClick: () => void}) => (
 	<SSubList viewBox="0 0 100 100" {...props}>
 		<circle cx="50" cy="50" r="50"/>
 		<path d="M 50 25 L 50 75 M 25 50 L 75 50"/>

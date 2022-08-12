@@ -3,7 +3,7 @@ import styled from "styled-components";
 const WHITE = "#F9FAF7";
 const BLUE = "#142136";
 
-const SDeleteSVG = styled.svg`
+const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	height: 1.5rem;
 	width: 1.5rem;
 	flex: none;
@@ -14,7 +14,7 @@ const SDeleteSVG = styled.svg`
 	fill: ${props => props.$isCompleted ? BLUE : WHITE};
 `
 
-const Edit = ({onClick, $isCompleted}) => {
+const Delete = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
 	return (
 		<SDeleteSVG $isCompleted={$isCompleted} version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
 			viewBox="0 0 490.584 490.584" onClick={onClick}>
@@ -32,4 +32,4 @@ const Edit = ({onClick, $isCompleted}) => {
 	)
 }
 
-export default Edit;
+export default Delete;
