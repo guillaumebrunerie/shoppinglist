@@ -8,17 +8,25 @@ generator client {
 }
 
 model List {
-  id    String @id @default(cuid())
-  name  String @default("Liste de courses")
-  theme String @default("default")
-  items Item[]
+  id     String @id @default(cuid())
+  name   String
+  color  String
+  items  Item[]
+  parent Item?  @relation("Sublist")
 }
 
 model Item {
   id        String  @id @default(cuid())
   order     Int
-  value     String
+
+  // Unused for sublists
+  value     String?
   completed Boolean @default(false)
-  list      List    @relation(fields: [listId], references: [id])
-  listId    String
+
+  // Unused for items
+  childList   List?   @relation("Sublist", fields: [childListId], references: [id])
+  childListId String? @unique
+
+  list   List   @relation(fields: [listId], references: [id])
+  listId String
 }

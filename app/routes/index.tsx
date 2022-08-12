@@ -1,41 +1,44 @@
-import { Link } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import * as React from "react";
+import styled from "styled-components";
 
-const Header = () => {
-	return (
-		<h1 className="text-2xl p-3">Listes accédées récemment</h1>
-	)
-}
-
-const ListIndicator = ({listId}: {listId: string}) => {
-	return (
-		<Link to={`/${listId}`}>
-			<li
-				className="flex h-14 pl-5 my-1 cursor-pointer items-center border border-black bg-blue-700 text-2xl text-slate-300"
-			>
-				{listId}
-			</li>
-		</Link>
-	)
-}
+const SHeader = styled.h1`
+	padding: 0.75rem;
+	// font-size: 1.5rem;
+	// line-height: 2rem;
+`
 
 export default function MainPage() {
-	const [knownLists, setKnownLists] = React.useState<string[] | null>(null);
+	const navigate = useNavigate();
+	const [noRootList, setNoRootList] = React.useState(false);
 	React.useEffect(() => {
-		// TODO: remove hacky default
-		setKnownLists(JSON.parse(localStorage.getItem("knownLists") || "[\"testList\"]"));
-	}, []);
+		const rootList = localStorage.getItem("rootList");
+		if (rootList !== null) {
+			navigate(`/${rootList}`, {replace: true});
+		} else {
+			setNoRootList(true);
+		}
+	}, [navigate]);
 
-	if (knownLists === null) return null;
+	const [value, setValue] = React.useState("");
+	const handleChange = (event: React.ChangeEvent) => {
+		setValue((event.target as HTMLInputElement).value);
+	}
 
-	return (
-		<div>
-			<Header/>
-			<ul className="flex select-none flex-col place-items-stretch">
-				{knownLists.map(listId => (
-					<ListIndicator key={listId} listId={listId}/>
-				))}
-			</ul>
-		</div>
-	)
+	const handleClick = () => {
+		localStorage.setItem("rootList", value);
+		navigate(`/${value}`);
+	}
+
+	if (noRootList) {
+		return (
+			<div>
+				<SHeader>Veuillez entrer l’identifiant de la liste</SHeader>
+				<input type="text" value={value} onChange={handleChange}/>
+				<button onClick={handleClick}>
+					OK
+				</button>
+			</div>
+		)
+	}
 }

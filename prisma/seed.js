@@ -40,33 +40,33 @@ async function seed() {
 	//   },
 	// });
 
-	await prisma.list.create({
-		data: {
-			id: "testList",
-		},
-	});
+	// await prisma.list.create({
+	// 	data: {
+	// 		id: "testList",
+	// 	},
+	// });
 
-	await prisma.item.create({
-		data: {
-			listId: "testList",
-			order: 0,
-			value: "Tomatoes",
-		},
-	});
-	await prisma.item.create({
-		data: {
-			listId: "testList",
-			order: 1,
-			value: "Carrots",
-		},
-	});
-	await prisma.item.create({
-		data: {
-			listId: "testList",
-			order: 2,
-			value: "Watermelon",
-		},
-	});
+	// await prisma.item.create({
+	// 	data: {
+	// 		listId: "testList",
+	// 		order: 0,
+	// 		value: "Tomatoes",
+	// 	},
+	// });
+	// await prisma.item.create({
+	// 	data: {
+	// 		listId: "testList",
+	// 		order: 1,
+	// 		value: "Carrots",
+	// 	},
+	// });
+	// await prisma.item.create({
+	// 	data: {
+	// 		listId: "testList",
+	// 		order: 2,
+	// 		value: "Watermelon",
+	// 	},
+	// });
 
 	console.log(`Database has been seeded. 🌱`);
 }

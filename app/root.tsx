@@ -1,5 +1,5 @@
 import * as React from "react";
-import type {LinksFunction, MetaFunction} from "@remix-run/node";
+import type {MetaFunction} from "@remix-run/node";
 import {
 	Links,
 	LiveReload,
@@ -12,19 +12,31 @@ import {
 } from "@remix-run/react";
 import io, {type Socket} from "socket.io-client";
 import {SocketProvider} from "./context";
-import tailwindStylesheetUrl from "./styles/tailwind.css";
+import { createGlobalStyle } from "styled-components";
 
 let isMount = true;
-
-export const links: LinksFunction = () => (
-	[{ rel: "stylesheet", href: tailwindStylesheetUrl }]
-);
 
 export const meta: MetaFunction = () => ({
 	charset: "utf-8",
 	title: "Listes de courses",
-	viewport: "width=device-width,initial-scale=1",
+	viewport: "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=yes",
 });
+
+const font = "Gantari";
+const weight = "400,700";
+
+const GlobalStyles = createGlobalStyle`
+	body, html {
+		height: 100%;
+		margin: 0;
+		background-color: #F0F0F0;
+		font-family: '${font}', sans-serif;
+	}
+	a {
+		text-decoration-line: none;
+		color: inherit;
+	}
+`
 
 export default function App() {
 	const [socket, setSocket] = React.useState<Socket>();
@@ -81,17 +93,25 @@ export default function App() {
 	}, [location, matches]);
 
 	return (
-		<html lang="en" className="h-full">
+		<html lang="en">
 			<head>
 				<Meta />
 				<link rel="manifest" href="/resources/manifest.webmanifest" />
+				<link rel="preconnect" href="https://fonts.googleapis.com"/>
+				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
+				<link href={`https://fonts.googleapis.com/css2?family=${font}:wght@${weight}&display=swap`} rel="stylesheet"/>
 				<Links />
+				{typeof document === "undefined"
+					? "__STYLES__"
+					: null
+				}
 			</head>
-			<body className="h-full bg-slate-500">
+			<body>
+				<GlobalStyles/>
 				<SocketProvider socket={socket}>
 					<Outlet />
 				</SocketProvider>
-				<ScrollRestoration />
+				{/*<ScrollRestoration/>*/}
 				<Scripts />
 				<LiveReload />
 			</body>
