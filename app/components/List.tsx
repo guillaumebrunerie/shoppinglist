@@ -1,7 +1,8 @@
 import * as React from "react";
 import {
-    Link,
+	Link,
 	useFetcher,
+	useFetchers,
 	useParams,
 } from "@remix-run/react";
 import {type FullList, type FullItem} from "~/models/lists.server";
@@ -10,89 +11,8 @@ import styled from "styled-components";
 import Edit from "~/components/Edit";
 import Delete from "~/components/Delete";
 
-const COLORS: {
-	[color: string]: {
-		incomplete: string,
-		completed: string,
-		text: string,
-		textCompleted: string,
-		bg: string,
-	}
-} = {
-	"white": {
-		incomplete: "#FFF",
-		completed: "#CCC",
-		text: "rgb(100 116 139)",
-		textCompleted: "rgb(100 116 139)",
-		bg: "#AAA",
-	},
-	"red": {
-		incomplete: "rgb(240, 100, 50)",
-		completed: "#C00",
-		text: "rgb(203 213 225)",
-		textCompleted: "rgb(100 116 139)",
-		bg: "#A00",
-	},
-	"green": {
-		incomplete: "#0F0",
-		completed: "#0C0",
-		text: "rgb(100 116 139)",
-		textCompleted: "rgb(203 213 225)",
-		bg: "#0A0",
-	},
-	"blue": {
-		incomplete: "#142136",
-		completed: "#F9FAF7",
-		text: "#F9FAF7",
-		textCompleted: "#ABAFB1",
-		bg: "#0000",
-	},
-}
-
-const defaultColor = COLORS["white"];
-
-const getColor = (color: string, completed: boolean) => {
-	const colors = COLORS[color] || defaultColor;
-	return completed ? colors.completed : colors.incomplete;
-}
-
-const getTextColor = (color: string, completed: boolean) => {
-	const colors = COLORS[color] || defaultColor;
-	return completed ? colors.textCompleted : colors.text;
-}
-
-const getBgColor = (color: string) => {
-	const colors = COLORS[color] || defaultColor;
-	return colors.bg;
-}
-
-
-const SDeleteSVG = styled.svg`
-	height: 2.5rem;
-	width: 2.5rem;
-	flex: none;
-	margin-right: 0.5rem;
-	cursor: pointer;
-`
-
-const DeleteButton = ({item}: {item: FullItem}) => {
-	const onUpdate = useBroadcastUpdate();
-	const fetcher = useFetcher();
-	const handleDelete = () => {
-		fetcher.submit(
-			{ id: item.id },
-			{ method: "post", action: `${item.listId}/delete` }
-		);
-		onUpdate();
-	};
-
-	return <Delete onClick={handleDelete} $isCompleted={item.completed}/>
-	// return (
-	// 	<SDeleteSVG viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid slice" role="img" onPointerDown={handleDelete}>
-	// 		<title>Supprimer cet élément</title>
-	// 		<path d="M -70 -70 L 70 70 M -70 70 L 70 -70" strokeWidth="20" stroke="#C00" strokeLinecap="round"/>
-	// 	</SDeleteSVG>
-	// )
+const DeleteButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
+	return <Delete onClick={onClick} $isCompleted={$isCompleted}/>
 };
 
 const EditButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
@@ -108,89 +28,119 @@ const useBroadcastUpdate = () => {
 	}, [socket, listId]);
 }
 
-const GREY = "#ABAFB1";
-
-const SRow = styled.li<{$isCompleted?: boolean, $isWaiting?: boolean, $color: string, $isSubList?: boolean, $fontSize?: string}>`
+const SRow = styled.li<{
+	$isCompleted?: boolean,
+	$isWaiting?: boolean,
+	$isWaitingDelete?: boolean,
+	$isSubList?: boolean,
+	$fontSize?: string,
+}>`
 	display: flex;
-	min-height: 3.5rem;
+	min-height: ${props => props.$isWaitingDelete ? "0.2rem" : "3.5rem"};
+	transition: min-height 500ms cubic-bezier(0.22, 1, 0.36, 1);
 	padding-left: 1rem;
 	align-items: center;
-	${props => (props.$isSubList && false) ? `border: 1px solid ${GREY};` : `border-top: 1px solid ${GREY}; border-bottom: 1px solid ${GREY};`}
-	font-size: ${props => "1.5rem"};
+	border-top: 1px solid var(--grey);
+	border-bottom: 1px solid var(--grey);
+	font-size: 1.5rem;
 	line-height: 2rem;
 	${props => props.$isWaiting && "opacity: 0.5;"}
-	background-color: ${props => getColor(props.$color, !!props.$isCompleted)}
+	background-color: var(--${props => (props.$isCompleted && !props.$isWaiting) ? "white" : "blue"});
 `
 
-const SItemText = styled.span<{$isCompleted?: boolean, $color: string}>`
+const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting: boolean}>`
+	padding-right: 1rem;
 	flex: 1 1 auto;
-	color: ${props => getTextColor(props.$color, !!props.$isCompleted)};
+	color: var(--${props => props.$isCompleted || props.$isWaiting ? "grey" : "white"});
 	cursor: pointer;
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const ItemRow = ({item, color}: {item: FullItem, color: string}) => {
+const ItemRow = ({item}: {item: FullItem}) => {
 	const onUpdate = useBroadcastUpdate();
-	const fetcher = useFetcher();
+
+	// Toggling checked state
+	const fetcherCheck = useFetcher();
 	const handleCheck = () => {
 		if (isEditing) return;
-		console.log("Check!");
-		onUpdate();
-		fetcher.submit(
-			{ id: item.id, currentState: `${item.completed}` },
+		fetcherCheck.submit(
+			{ id: item.id, currentState: `${completed}` },
 			{ method: "post", action: `${item.listId}/toggle` }
 		);
-	};
-	const value = item.value as string;
-
-	const [isEditing, setIsEditing] = React.useState(false);
-	const doSubmit = (newValue: string) => {
-		setIsEditing(false);
 		onUpdate();
-		fetcher.submit(
-			{id: item.id, newValue: newValue.trim()},
+	};
+	let completed = item.completed;
+	const isWaitingCheck = (fetcherCheck.type == "actionSubmission" || fetcherCheck.type === "actionReload");
+	if (isWaitingCheck) {
+		completed = fetcherCheck.submission.formData.get("currentState") === "false"
+	}
+
+	// Editing item
+	const fetcherEdit = useFetcher();
+	const doSubmit = (value: string) => {
+		setIsEditing(false);
+		if (!value || value === item.value) return;
+		fetcherEdit.submit(
+			{id: item.id, value},
 			{method: "post", action: `${item.listId}/edit`}
 		);
+		onUpdate();
 	}
-
+	let value = item.value as string;
+	const isWaitingEdit = (fetcherEdit.type == "actionSubmission" || fetcherEdit.type === "actionReload");
+	if (isWaitingEdit) {
+		value = fetcherEdit.submission.formData.get("value") as string;
+	}
+	const [isEditing, setIsEditing] = React.useState(false);
 	const handleBlur = (event: React.FocusEvent) => {
 		doSubmit((event.target as HTMLInputElement).value.trim());
-		// setTimeout(() => {
-		// }, 1000)
 	}
-
 	const handleKeyUp = (event: React.KeyboardEvent) => {
 		if (event.key == "Enter") {
-			 onUpdate();
 			doSubmit((event.target as HTMLInputElement).value.trim());
 		}
 	}
 
+	// Deleting item
+	const fetcherDelete = useFetcher();
+	const handleDelete = () => {
+		fetcherDelete.submit(
+			{ id: item.id },
+			{ method: "post", action: `${item.listId}/delete` }
+		);
+		onUpdate();
+	};
+	const isWaitingDelete = (fetcherDelete.type == "actionSubmission" || fetcherDelete.type === "actionReload");
+
+	if (isWaitingDelete) {
+		return (
+			<SRow $isCompleted={completed} $isWaiting={isWaitingCheck || isWaitingEdit} $isWaitingDelete={isWaitingDelete}/>
+		);
+	}
+
 	return (
-		<SRow $isCompleted={item.completed} $isWaiting={fetcher.state !== "idle"} $color={color}>
-			<SItemText onClick={handleCheck} $isCompleted={item.completed} $color={color}>
+		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete}>
+			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
 				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
 			</SItemText>
-			{item.completed ? <DeleteButton item={item}/> : <EditButton onClick={() => setIsEditing(true)} $isCompleted={item.completed}/>}
+			{completed && <DeleteButton onClick={handleDelete} $isCompleted={!isWaitingCheck}/>}
+			{!completed && <EditButton onClick={() => setIsEditing(true)} $isCompleted={completed}/>}
 		</SRow>
 	);
 };
 
 const SublistRow = ({item}: {item: FullItem}) => {
-	const fetcher = useFetcher();
 	const subList = item.childList as FullList;
 	return (
 		<Link to={`/${subList.id}`}>
-			<SRow $isWaiting={fetcher.state !== "idle"} $color={subList.color} $isSubList>
-				<SItemText $color={subList.color}>
+			<SRow $isSubList>
+				<SItemText>
 					{subList.name}
 				</SItemText>
 			</SRow>
 		</Link>
 	)
 }
-
-const WHITE = "#F0F0F0";
 
 const SInput = styled.input`
 	margin-left: 0;
@@ -204,43 +154,27 @@ const SInput = styled.input`
 	font-size: 0.66em;
 	font-weight: inherit;
 	&:focus::placeholder {
-		color: #CCC;
+		color: var(--light-grey);
 	}
 	&:focus {
 		outline-offset: 1px;
-		outline: 1.5px solid ${WHITE};
+		outline: 1.5px solid var(--white);
 	}
-	caret-color: ${GREY};
+	caret-color: var(--grey);
 `
 
-const AddItem = ({color}: {color: string}) => {
+const AddItem = () => {
 	const socket = useSocket();
 	const params = useParams();
 	const listId = params.listId as string;
 	const fetcher = useFetcher();
 	const [text, setText] = React.useState("");
 
-	const [isSubList, setIsSubList] = React.useState(false);
-	const handleIsSubListChange = (event: React.ChangeEvent) => {
-		setIsSubList((event.target as HTMLInputElement).checked);
-	}
-
-	// const [scroll, setScroll] = React.useState(true);
-	// const ref = React.useRef<HTMLInputElement | null>(null);
-	// const entry = useIntersectionObserver(ref, {});
-	// const isVisible = !!entry?.isIntersecting
-	// React.useEffect(() => {
-	// 	if (scroll && document.activeElement === ref.current) {
-	// 		ref.current?.scrollIntoView();
-	// 		setScroll(false);
-	// 	}
-	// }, [scroll, isVisible])
-
-	const doAdd = () => {
-		if (!text) return;
+	const doAdd = (value: string) => {
+		if (!value) return;
 		socket?.emit("update", listId);
 		fetcher.submit(
-			{ item: text.trim(), isSubList: `${isSubList}` },
+			{ value },
 			{ method: "post", action: `${listId}/add` }
 		);
 		setText("");
@@ -250,35 +184,36 @@ const AddItem = ({color}: {color: string}) => {
 		setText((event.target as HTMLInputElement).value);
 	};
 	const handleKeyDown = (event: React.KeyboardEvent) => {
-		switch (event.key) {
-			case "Enter":
-				doAdd();
+		if (event.key === "Enter") {
+			doAdd(text.trim());
 		}
 	};
 
-	const placeholder = isSubList ? "Ajouter une sous-liste…" : "Ajouter…";
-
 	return (
-		<SRow $color={color} $fontSize="1rem">
-			<SInput
-				type="text"
-				enterKeyHint="done"
-				placeholder={placeholder}
-				value={text}
-				onChange={handleChange}
-				onKeyDown={handleKeyDown}
-			/>
-		</SRow>
+		<>
+			<SRow $fontSize="1rem">
+				<SInput
+					type="text"
+					enterKeyHint="done"
+					placeholder="Ajouter…"
+					value={text}
+					onChange={handleChange}
+					onKeyDown={handleKeyDown}
+				/>
+			</SRow>
+			{(fetcher.type == "actionSubmission" || fetcher.type === "actionReload") && (
+				<SRow $isWaiting>
+					<SItemText>
+						{fetcher.submission.formData.get("value") as string}
+					</SItemText>
+				</SRow>
+			)}
+		</>
 	);
 };
-			// <input
-			// 	type="checkbox"
-			// 	checked={isSubList}
-			// 	onChange={handleIsSubListChange}
-			// />
 
-const Row = ({item, color}: {item: FullItem, color: string}) => {
-	return (item.childListId === null ? <ItemRow item={item} color={color}/> : <SublistRow item={item}/>)
+const Row = ({item}: {item: FullItem}) => {
+	return (item.childListId === null ? <ItemRow item={item}/> : <SublistRow item={item}/>)
 }
 
 const SMainList = styled.ul`
@@ -291,10 +226,6 @@ const SMainList = styled.ul`
 	padding-bottom: 0.25rem;
 `;
 
-const SMain = styled.main<{$color: string}>`
-	// background: ${props => getBgColor(props.$color)};
-`;
-
 const SHeader = styled.div`
 	margin-top: 0;
 	margin-bottom: 0;
@@ -302,42 +233,44 @@ const SHeader = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	color: #142136;
+	color: var(--blue);
 `
 
-const SName = styled.span`
+const SName = styled.span<{$isWaiting: boolean}>`
 	margin: 0;
 	margin-right: auto;
 	font-size: 2.2rem;
 	font-weight: bold;
+	${props => props.$isWaiting && "opacity: 0.5;"}
 `
 
 const SBack = styled(Link)`
 	display: flex;
 	align-items: center;
 	padding: 0.75rem 0 0 0.25rem;
-	color: #142136;
+	color: var(--blue);
 	font-size: 1.3rem;
 	line-height: 1.5rem;
 `
 
 const Header = ({list}: {list: FullList}) => {
+	const onUpdate = useBroadcastUpdate();
 	const fetcher = useFetcher();
-	const handleColorChange = (event: React.ChangeEvent) => {
-		fetcher.submit(
-			{ color: (event.target as HTMLSelectElement).value.trim() },
-			{ method: "post", action: `${list.id}/changeColor` }
-		);
-	};
-
-	const [isEditing, setIsEditing] = React.useState(false);
-	const doSubmit = (newValue: string) => {
+	const doSubmit = (name: string) => {
 		setIsEditing(false);
+		if (!name || name === list.name) return;
+		onUpdate();
 		fetcher.submit(
-			{newValue: newValue.trim()},
+			{name},
 			{method: "post", action: `${list.id}/rename`}
 		);
 	}
+	let name = list.name;
+	const isWaiting = fetcher.type == "actionSubmission" || fetcher.type == "actionReload";
+	if (isWaiting) {
+		name = fetcher.submission.formData.get("name") as string;
+	}
+	const [isEditing, setIsEditing] = React.useState(false);
 
 	const handleBlur = (event: React.FocusEvent) => {
 		doSubmit((event.target as HTMLInputElement).value.trim());
@@ -351,25 +284,19 @@ const Header = ({list}: {list: FullList}) => {
 
 	return (
 		<SHeader>
- 			<SName>
-				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={list.name} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : <span onClick={() => setIsEditing(true)}>{list.name}</span>}
+ 			<SName $isWaiting={isWaiting}>
+				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={name} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : <span onClick={() => setIsEditing(true)}>{name}</span>}
 			</SName>
 		</SHeader>
 	)
 }
-			// <select onChange={handleColorChange} value={list.color}>
-			// 	{Object.keys(COLORS).map(color => (
-			// 		<option key={color} value={color}>{color}</option>
-			// 	))}
-			// </select>
-const BLUE = "#142136";
 
 const SBackThing = styled.svg`
 	height: 1.2rem;
 	width: 1.5rem;
 	flex: none;
 	cursor: pointer;
-	stroke: ${BLUE};
+	stroke: var(--blue);
 	fill: none;
 	stroke-width: 14px;
 	stroke-linecap: round;
@@ -391,9 +318,9 @@ const SSubList = styled.svg`
 	flex: none;
 	cursor: pointer;
 	stroke: none;
-	fill: ${BLUE};
+	fill: var(--blue);
 	path {
-		stroke: ${WHITE};
+		stroke: var(--white);
 		stroke-width: 10px;
 		fill: none;
 		stroke-linecap: round;
@@ -419,17 +346,17 @@ const List = ({list}: {list: FullList}) => {
 	};
 
 	return (
-		<SMain $color={list.color}>
+		<main>
 			{list.parent && <SBack to={`/${list.parent.listId}`}><BackThing/>Retour</SBack>}
 			<Header list={list}/>
 			<SMainList>
-				{list.parent && <AddItem color={list.color}/>}
+				{list.parent && <AddItem/>}
 				{[...list.items].reverse().map((item) => (
-					<Row key={item.id} item={item} color={list.color}/>
+					<Row key={item.id} item={item}/>
 				))}
 			</SMainList>
 			{(!list.parent) && <AddSubListSVG onClick={handleAddSubList}/>}
-		</SMain>
+		</main>
 	);
 };
 

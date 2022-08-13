@@ -1,17 +1,14 @@
 import styled from "styled-components";
 
-const WHITE = "#F9FAF7";
-const BLUE = "#142136";
-
 const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	height: 1.5rem;
 	width: 1.5rem;
 	flex: none;
 	margin-right: 1.5rem;
 	cursor: pointer;
-	stroke: ${props => props.$isCompleted ? WHITE : BLUE};
+	stroke: var(--${props => props.$isCompleted ? "white" : "blue"});
 	stroke-width: 10px;
-	fill: ${props => props.$isCompleted ? BLUE : WHITE};
+	fill: var(--${props => props.$isCompleted ? "blue" : "white"});
 `
 
 const Delete = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {

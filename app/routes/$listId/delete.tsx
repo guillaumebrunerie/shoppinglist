@@ -1,7 +1,7 @@
-import { type ActionFunction } from "@remix-run/node";
+import { type ActionArgs } from "@remix-run/node";
 import { deleteItem } from "~/models/lists.server";
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: ActionArgs) => {
 	const payload = await request.formData();
 	const id = payload.get("id");
 	if (!id || typeof id !== "string") return;

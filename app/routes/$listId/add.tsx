@@ -1,17 +1,17 @@
-import { type ActionFunction } from "@remix-run/node";
+import { type ActionArgs } from "@remix-run/node";
 import { addItem, addSubList } from "~/models/lists.server";
 
-export const action: ActionFunction = async ({ params, request }) => {
+export const action = async ({ params, request }: ActionArgs) => {
 	const listId = params.listId as string;
 	const payload = await request.formData();
-	const item = payload.get("item");
-	if (!item || typeof item !== "string") return null;
+	const value = payload.get("value");
+	if (!value || typeof value !== "string") return null;
 	const isSubList = payload.get("isSubList") === "true";
 
 	if (isSubList) {
-		await addSubList(listId, item, "blue");
+		await addSubList(listId, value, "blue");
 	} else {
-		await addItem(listId, item);
+		await addItem(listId, value);
 	}
 	return null;
 };

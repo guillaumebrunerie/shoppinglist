@@ -2,72 +2,57 @@ import * as React from "react";
 
 import {
 	useLoaderData,
-	useFetcher,
 	useSubmit,
     useNavigate,
 } from "@remix-run/react";
-import {json, type LoaderFunction} from "@remix-run/node";
-import {getList, type FullList} from "~/models/lists.server";
+import {json, type LoaderArgs} from "@remix-run/node";
+import {getList} from "~/models/lists.server";
 import {useSocket} from "~/context";
 import List from "~/components/List";
 
-type LoaderData = {
-	listId: string;
-	list: FullList | null;
-};
-
-export const loader: LoaderFunction = async ({ params }) => {
+export const loader = async ({ params }: LoaderArgs) => {
 	const listId = params.listId as string;
 	const list = await getList(listId);
-	return json<LoaderData>({listId, list});
+	return json({listId, list});
+};
+
+export const action = async () => {
+	return json({})
 };
 
 export default function ListPage() {
-	// const fetcher = useFetcher<LoaderData>();
-	const data = useLoaderData<LoaderData>();
-	// const data = fetcher.data || loaderData;
-	const { list, listId } = data || {list: null, listId: ""};
+	const {list, listId} = useLoaderData<typeof loader>();
 
+	// Update shown data when we receive an update message from the websocket
 	const submit = useSubmit();
-
 	const socket = useSocket();
-	const navigate = useNavigate();
-	// const fetcherLoad = fetcher.load;
 	React.useEffect(() => {
-		if (!socket) return;
-
-		socket.on("update", (updatedListId) => {
+		socket?.on("update", (updatedListId: string) => {
 			if (updatedListId === listId) {
-				navigate(`/${listId}`, {replace: true});
-				// navigate(0);
+				submit(null, {method: "post"});
 			}
 		});
-	}, [socket, navigate, listId]);
+	}, [socket, listId, submit]);
 
-	// Add the listId to local storage
-	React.useEffect(() => {
-		let knownLists = JSON.parse(localStorage.getItem("knownLists") || JSON.stringify([listId]));
-		if (!knownLists.includes(listId)) {
-			knownLists.push(listId);
-		}
-		localStorage.setItem("knownLists", JSON.stringify(knownLists));
-	});
-
+	// Create root list
 	const handleCreate = () => {
 		submit(null, { method: "post", action: `${listId}/create` });
 	};
 
+	// Go back to the screen for choosing root list
+	const navigate = useNavigate();
 	const handleCancel = () => {
 		localStorage.removeItem("rootList");
 		navigate(`/`);
 	};
 
-	if (!list) {
-		return (
-			<p>
-				La liste "{listId}" n’existe pas, <button onClick={handleCreate}>la créer</button>, <button onClick={handleCancel}>annuler</button>.
-			</p>
-		);
+	if (list) {
+		return <List list={list} />;
 	}
-	return <List list={list} />;
+
+	return (
+		<p>
+			La liste "{listId}" n’existe pas, <button onClick={handleCreate}>la créer</button>, <button onClick={handleCancel}>annuler</button>.
+		</p>
+	);
 }

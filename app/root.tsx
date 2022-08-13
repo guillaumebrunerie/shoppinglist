@@ -29,7 +29,11 @@ const GlobalStyles = createGlobalStyle`
 	body, html {
 		height: 100%;
 		margin: 0;
-		background-color: #F0F0F0;
+		--white: #F0F0F0;
+		--grey: #ABAFB1;
+		--blue: #142136;
+		--light-grey: #CCCCCC;
+		background-color: var(--white);
 		font-family: '${font}', sans-serif;
 	}
 	a {
@@ -99,7 +103,7 @@ export default function App() {
 				<link rel="manifest" href="/resources/manifest.webmanifest" />
 				<link rel="preconnect" href="https://fonts.googleapis.com"/>
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
-				<link href={`https://fonts.googleapis.com/css2?family=${font}:wght@${weight}&display=swap`} rel="stylesheet"/>
+				<link type="css" href={`https://fonts.googleapis.com/css2?family=${font}:wght@${weight}&display=swap`} rel="stylesheet"/>
 				<Links />
 				{typeof document === "undefined"
 					? "__STYLES__"
@@ -111,7 +115,7 @@ export default function App() {
 				<SocketProvider socket={socket}>
 					<Outlet />
 				</SocketProvider>
-				{/*<ScrollRestoration/>*/}
+				<ScrollRestoration/>
 				<Scripts />
 				<LiveReload />
 			</body>

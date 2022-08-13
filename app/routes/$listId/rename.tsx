@@ -1,12 +1,12 @@
-import { type ActionFunction } from "@remix-run/node";
+import { type ActionArgs } from "@remix-run/node";
 import { renameList } from "~/models/lists.server";
 
-export const action: ActionFunction = async ({params, request}) => {
+export const action = async ({params, request}: ActionArgs) => {
 	const listId = params.listId as string;
 	const payload = await request.formData();
-	const newValue = payload.get("newValue");
-	if (!newValue || typeof newValue !== "string") return null;
+	const name = payload.get("name");
+	if (!name || typeof name !== "string") return null;
 
-	await renameList(listId, newValue);
+	await renameList(listId, name);
 	return null;
 };

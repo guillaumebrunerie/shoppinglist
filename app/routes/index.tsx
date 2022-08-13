@@ -4,8 +4,6 @@ import styled from "styled-components";
 
 const SHeader = styled.h1`
 	padding: 0.75rem;
-	// font-size: 1.5rem;
-	// line-height: 2rem;
 `
 
 export default function MainPage() {
