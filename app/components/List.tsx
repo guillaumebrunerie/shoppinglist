@@ -2,7 +2,6 @@ import * as React from "react";
 import {
 	Link,
 	useFetcher,
-	useFetchers,
 	useParams,
 } from "@remix-run/react";
 import {type FullList, type FullItem} from "~/models/lists.server";
@@ -48,7 +47,7 @@ const SRow = styled.li<{
 	background-color: var(--${props => (props.$isCompleted && !props.$isWaiting) ? "white" : "blue"});
 `
 
-const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting: boolean}>`
+const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	padding-right: 1rem;
 	flex: 1 1 auto;
 	color: var(--${props => props.$isCompleted || props.$isWaiting ? "grey" : "white"});
