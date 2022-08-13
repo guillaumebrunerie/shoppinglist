@@ -19,7 +19,7 @@ let isMount = true;
 export const meta: MetaFunction = () => ({
 	charset: "utf-8",
 	title: "Listes de courses",
-	viewport: "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=yes",
+	viewport: "width=device-width,initial-scale=1",
 });
 
 const font = "Gantari";
@@ -35,6 +35,7 @@ const GlobalStyles = createGlobalStyle`
 		--light-grey: #CCCCCC;
 		background-color: var(--white);
 		font-family: '${font}', sans-serif;
+		text-size-adjust: none;
 	}
 	a {
 		text-decoration-line: none;

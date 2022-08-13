@@ -328,7 +328,8 @@ const SSubList = styled.svg`
 `
 
 const SMain = styled.main<{$isLoading: boolean}>`
-	${props => props.$isLoading && "opacity: 0.7;"}
+	opacity: ${props => props.$isLoading ? "0.8" : "1"};
+	transition: opacity ${props => props.$isLoading ? "0" : "100ms"} ease;
 `
 
 const AddSubListSVG = (props: {onClick: () => void}) => (
