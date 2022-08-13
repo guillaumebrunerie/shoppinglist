@@ -372,7 +372,7 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 
 	return (
 		<SMain $isLoading={isLoading}>
-			{list.parent && <SBack onClick={() => navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
+			{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
 			<Header list={list}/>
 			<SMainList>
 				{list.parent && <AddItem/>}
