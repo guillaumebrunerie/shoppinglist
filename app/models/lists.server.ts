@@ -1,18 +1,38 @@
-import type {List, Item} from "@prisma/client";
-
 import {prisma} from "~/db.server";
 
-export type FullItem = Item & {childList: List | null};
-export type FullList = List & {items: FullItem[], parent: (Item & {list: List}) | null};
+import type {List, Item} from "@prisma/client";
 export type {Item} from "@prisma/client";
 
+type NamedItem = Item & {childList: List | null};
+type ListWithNamedItems = List & {items: NamedItem[]};
+export type FullItem = Item & {childList: ListWithNamedItems | null, list: ListWithNamedItems};
+export type FullList = List & {items: FullItem[] , parent: FullItem | null};
+
 export const getList = async (id: string): Promise<FullList | null> => {
+	// Not sure if that’s how I’m supposed to do such requests...
 	return await prisma.list.findUnique({
 		where: { id },
 		include: {
 			items: {
 				include: {
-					childList: true,
+					childList: {
+						include: {
+							items: {
+								include: {
+									childList: true,
+								}
+							}
+						}
+					},
+					list: {
+						include: {
+							items: {
+								include: {
+									childList: true,
+								}
+							}
+						}
+					},
 				},
 				orderBy: {
 					order: "asc",
@@ -20,9 +40,26 @@ export const getList = async (id: string): Promise<FullList | null> => {
 			},
 			parent: {
 				include: {
-					list: true,
-				}
-			},
+					childList: {
+						include: {
+							items: {
+								include: {
+									childList: true,
+								}
+							}
+						}
+					},
+					list: {
+						include: {
+							items: {
+								include: {
+									childList: true,
+								}
+							}
+						}
+					},
+				},
+			}
 		},
 	});
 };

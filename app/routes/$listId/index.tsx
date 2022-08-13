@@ -8,9 +8,9 @@ import {
 	useTransition,
 } from "@remix-run/react";
 import {json, type LoaderArgs} from "@remix-run/node";
-import {getList, Item} from "~/models/lists.server";
+import {getList} from "~/models/lists.server";
 import {useSocket} from "~/context";
-import List from "~/components/List";
+import List, { type HalfList } from "~/components/List";
 
 export const loader = async ({ params }: LoaderArgs) => {
 	const listId = params.listId as string;
@@ -63,35 +63,36 @@ export default function ListPage() {
 	}
 
 	let isLoading = false;
-	if (transition.state === "loading") {
+	let displayedList: HalfList = list;
+	if (transition.type === "normalLoad") {
 		const id = transition.location.pathname.slice(1);
 		const item = list.items.find(item => item.childListId === id);
 		const name = item?.childList?.name;
-		if (id && item && name) {
+		const items = item?.childList?.items;
+		if (id && item && name && items) {
 			isLoading = true;
-			list = {
+			displayedList = {
 				id,
 				name,
-				parent: {...item, list},
-				items: [],
-				color: "red",
+				parent: {listId: item.listId},
+				items,
 			}
 		} else {
 			const id = list.parent?.listId;
 			const item = list.parent;
 			const name = item?.list.name;
-			if (id && item && name) {
-				list = {
+			const items = item?.list.items;
+			if (id && item && name && items) {
+				displayedList = {
 					id,
 					name,
 					parent: null,
-					items: [],
-					color: "red",
+					items,
 				}
 				isLoading = true;
 			}
 		}
 	}
 
-	return <List list={list} isLoading={isLoading}/>;
+	return <List list={displayedList} isLoading={isLoading}/>;
 }

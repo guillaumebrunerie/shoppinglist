@@ -4,9 +4,7 @@ import {
 	useFetcher,
 	useNavigate,
 	useParams,
-	useTransition,
 } from "@remix-run/react";
-import {type FullList, type FullItem} from "~/models/lists.server";
 import {useSocket} from "~/context";
 import styled from "styled-components";
 import Edit from "~/components/Edit";
@@ -57,7 +55,7 @@ const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const ItemRow = ({item}: {item: FullItem}) => {
+const ItemRow = ({item}: {item: HalfItem}) => {
 	const onUpdate = useBroadcastUpdate();
 
 	// Toggling checked state
@@ -130,8 +128,9 @@ const ItemRow = ({item}: {item: FullItem}) => {
 	);
 };
 
-const SublistRow = ({item}: {item: FullItem}) => {
-	const subList = item.childList as FullList;
+const SublistRow = ({item}: {item: HalfItem}) => {
+	const subList = item.childList;
+	if (!subList) return null;
 	return (
 		<Link to={`/${subList.id}`}>
 			<SRow $isSubList>
@@ -213,7 +212,7 @@ const AddItem = () => {
 	);
 };
 
-const Row = ({item}: {item: FullItem}) => {
+const Row = ({item}: {item: HalfItem}) => {
 	return (item.childListId === null ? <ItemRow item={item}/> : <SublistRow item={item}/>)
 }
 
@@ -254,7 +253,7 @@ const SBack = styled.span`
 	line-height: 1.5rem;
 `
 
-const Header = ({list}: {list: FullList}) => {
+const Header = ({list}: {list: HalfList}) => {
 	const onUpdate = useBroadcastUpdate();
 	const fetcher = useFetcher();
 	const doSubmit = (name: string) => {
@@ -339,7 +338,26 @@ const AddSubListSVG = (props: {onClick: () => void}) => (
 	</SSubList>
 )
 
-const List = ({list, isLoading}: {list: FullList, isLoading: boolean}) => {
+type HalfItem = {
+	id: string,
+	listId: string,
+	completed: boolean,
+	value?: string | null,
+	childListId?: string | null,
+	childList?: {
+		id: string,
+		name: string,
+	} | null,
+};
+
+export type HalfList = {
+	id: string,
+	name: string,
+	parent: {listId: string} | null,
+	items: HalfItem[],
+}
+
+const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 	const onUpdate = useBroadcastUpdate();
 	const fetcher = useFetcher();
 	const handleAddSubList = () => {
@@ -354,7 +372,7 @@ const List = ({list, isLoading}: {list: FullList, isLoading: boolean}) => {
 
 	return (
 		<SMain $isLoading={isLoading}>
-			{list.parent && <SBack onClick={() => navigate(-1)}><BackThing/>Retour</SBack>}
+			{list.parent && <SBack onClick={() => navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
 			<Header list={list}/>
 			<SMainList>
 				{list.parent && <AddItem/>}
