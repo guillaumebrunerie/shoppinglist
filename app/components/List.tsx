@@ -2,7 +2,9 @@ import * as React from "react";
 import {
 	Link,
 	useFetcher,
+	useNavigate,
 	useParams,
+	useTransition,
 } from "@remix-run/react";
 import {type FullList, type FullItem} from "~/models/lists.server";
 import {useSocket} from "~/context";
@@ -23,7 +25,7 @@ const useBroadcastUpdate = () => {
 	const listId = params.listId as string;
 	const socket = useSocket();
 	return React.useCallback(() => {
-		socket?.emit("update", listId)
+		socket?.emit("update", listId);
 	}, [socket, listId]);
 }
 
@@ -163,7 +165,7 @@ const SInput = styled.input`
 `
 
 const AddItem = () => {
-	const socket = useSocket();
+	const onUpdate = useBroadcastUpdate();
 	const params = useParams();
 	const listId = params.listId as string;
 	const fetcher = useFetcher();
@@ -171,12 +173,12 @@ const AddItem = () => {
 
 	const doAdd = (value: string) => {
 		if (!value) return;
-		socket?.emit("update", listId);
+		setText("");
 		fetcher.submit(
 			{ value },
 			{ method: "post", action: `${listId}/add` }
 		);
-		setText("");
+		onUpdate();
 	};
 
 	const handleChange = (event: React.ChangeEvent) => {
@@ -243,7 +245,7 @@ const SName = styled.span<{$isWaiting: boolean}>`
 	${props => props.$isWaiting && "opacity: 0.5;"}
 `
 
-const SBack = styled(Link)`
+const SBack = styled.span`
 	display: flex;
 	align-items: center;
 	padding: 0.75rem 0 0 0.25rem;
@@ -326,6 +328,10 @@ const SSubList = styled.svg`
 	}
 `
 
+const SMain = styled.main<{$isLoading: boolean}>`
+	${props => props.$isLoading && "opacity: 0.7;"}
+`
+
 const AddSubListSVG = (props: {onClick: () => void}) => (
 	<SSubList viewBox="0 0 100 100" {...props}>
 		<circle cx="50" cy="50" r="50"/>
@@ -333,20 +339,22 @@ const AddSubListSVG = (props: {onClick: () => void}) => (
 	</SSubList>
 )
 
-const List = ({list}: {list: FullList}) => {
+const List = ({list, isLoading}: {list: FullList, isLoading: boolean}) => {
 	const onUpdate = useBroadcastUpdate();
 	const fetcher = useFetcher();
 	const handleAddSubList = () => {
 		onUpdate();
 		fetcher.submit(
-			{ item: "Nouvelle liste", isSubList: "true" },
+			{ value: "Nouvelle liste", isSubList: "true" },
 			{ method: "post", action: `${list.id}/add` }
 		);
 	};
 
+	const navigate = useNavigate();
+
 	return (
-		<main>
-			{list.parent && <SBack to={`/${list.parent.listId}`}><BackThing/>Retour</SBack>}
+		<SMain $isLoading={isLoading}>
+			{list.parent && <SBack onClick={() => navigate(-1)}><BackThing/>Retour</SBack>}
 			<Header list={list}/>
 			<SMainList>
 				{list.parent && <AddItem/>}
@@ -355,7 +363,7 @@ const List = ({list}: {list: FullList}) => {
 				))}
 			</SMainList>
 			{(!list.parent) && <AddSubListSVG onClick={handleAddSubList}/>}
-		</main>
+		</SMain>
 	);
 };
 

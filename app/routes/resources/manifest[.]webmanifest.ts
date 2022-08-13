@@ -8,8 +8,8 @@ export let loader: LoaderFunction = () => {
       name: "Listes de courses",
       start_url: "/",
       display: "standalone",
-      background_color: "#d3d7dd",
-      theme_color: "#3b82f6",
+      background_color: "#F0F0F0",
+      theme_color: "#142136",
       shortcuts: [],
       icons: [
         {

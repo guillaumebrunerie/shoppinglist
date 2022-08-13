@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
 
   socket.on("update", (listId) => {
       console.log("Broadcasting update!");
-      io.emit("update", listId)
+      socket.broadcast.emit("update", listId);
   });
 });
 
