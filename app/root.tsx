@@ -36,6 +36,7 @@ const GlobalStyles = createGlobalStyle`
 		background-color: var(--white);
 		font-family: '${font}', sans-serif;
 		text-size-adjust: none;
+		box-sizing: border-box;
 	}
 	a {
 		text-decoration-line: none;

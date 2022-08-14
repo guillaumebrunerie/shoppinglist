@@ -45,11 +45,25 @@ const SRow = styled.li<{
 	line-height: 2rem;
 	${props => props.$isWaiting && "opacity: 0.5;"}
 	background-color: var(--${props => (props.$isCompleted && !props.$isWaiting) ? "white" : "blue"});
+
+	overflow: scroll;
+	scroll-snap-type: x mandatory;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+	& *:first-child, & *:last-child {
+		scroll-snap-align: end;
+	}
+	& svg {
+		border-left: 1px solid var(--grey);
+		padding: 0 1rem;
+		min-height: inherit;
+	}
 `
 
 const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
-	padding-right: 1rem;
-	flex: 1 1 auto;
+	flex-shrink: 0;
+	width: 100%;
 	color: var(--${props => props.$isCompleted || props.$isWaiting ? "grey" : "white"});
 	cursor: pointer;
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
@@ -122,8 +136,8 @@ const ItemRow = ({item}: {item: HalfItem}) => {
 			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
 				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
 			</SItemText>
-			{completed && <DeleteButton onClick={handleDelete} $isCompleted={!isWaitingCheck}/>}
-			{!completed && <EditButton onClick={() => setIsEditing(true)} $isCompleted={completed}/>}
+			<DeleteButton onClick={handleDelete} $isCompleted={completed && !isWaitingCheck}/>
+			<EditButton onClick={() => setIsEditing(true)} $isCompleted={completed && !isWaitingCheck}/>
 		</SRow>
 	);
 };

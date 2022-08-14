@@ -4,7 +4,6 @@ const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	height: 1.5rem;
 	width: 1.5rem;
 	flex: none;
-	margin-right: 1.5rem;
 	cursor: pointer;
 	stroke: var(--${props => props.$isCompleted ? "white" : "blue"});
 	stroke-width: 10px;
