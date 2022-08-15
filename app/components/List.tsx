@@ -35,13 +35,13 @@ const SRow = styled.li<{
 	$fontSize?: string,
 }>`
 	display: flex;
-	min-height: ${props => props.$isWaitingDelete ? "0.2rem" : "3.5rem"};
+	min-height: ${props => props.$isWaitingDelete ? "0.2rem" : props.$isSubList ? "3.5rem" : "3rem"};
 	transition: min-height 500ms cubic-bezier(0.22, 1, 0.36, 1);
-	padding-left: 1rem;
+	padding-left: ${props => props.$isSubList ? "1rem" : "0.8rem"};
 	align-items: center;
 	border-top: 1px solid var(--grey);
 	border-bottom: 1px solid var(--grey);
-	font-size: 1.5rem;
+	font-size: ${props => props.$isSubList ? "1.5rem" : "1.2rem"};
 	line-height: 2rem;
 	${props => props.$isWaiting && "opacity: 0.5;"}
 	background-color: var(--${props => (props.$isCompleted && !props.$isWaiting) ? "white" : "blue"});
@@ -69,20 +69,28 @@ const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const ItemRow = ({item}: {item: HalfItem}) => {
+const Row = ({item}: {item: HalfItem}) => {
 	const onUpdate = useBroadcastUpdate();
+
+	const isSubList = !!item.childListId;
+
+	const navigate = useNavigate();
 
 	// Toggling checked state
 	const fetcherCheck = useFetcher();
 	const handleCheck = () => {
 		if (isEditing) return;
+		if (isSubList) {
+			navigate(`/${item.childList?.id}`)
+			return;
+		}
 		fetcherCheck.submit(
 			{ id: item.id, currentState: `${completed}` },
 			{ method: "post", action: `${item.listId}/toggle` }
 		);
 		onUpdate();
 	};
-	let completed = item.completed;
+	let completed = !isSubList && item.completed;
 	const isWaitingCheck = (fetcherCheck.type == "actionSubmission" || fetcherCheck.type === "actionReload");
 	if (isWaitingCheck) {
 		completed = fetcherCheck.submission.formData.get("currentState") === "false"
@@ -93,13 +101,20 @@ const ItemRow = ({item}: {item: HalfItem}) => {
 	const doSubmit = (value: string) => {
 		setIsEditing(false);
 		if (!value || value === item.value) return;
-		fetcherEdit.submit(
-			{id: item.id, value},
-			{method: "post", action: `${item.listId}/edit`}
-		);
+		if (isSubList) {
+			fetcherEdit.submit(
+				{value},
+				{method: "post", action: `${item.childListId}/rename`},
+			);
+		} else {
+			fetcherEdit.submit(
+				{id: item.id, value},
+				{method: "post", action: `${item.listId}/edit`}
+			);
+		}
 		onUpdate();
 	}
-	let value = item.value as string;
+	let value = (isSubList ? item.childList?.name : item?.value) as string;
 	const isWaitingEdit = (fetcherEdit.type == "actionSubmission" || fetcherEdit.type === "actionReload");
 	if (isWaitingEdit) {
 		value = fetcherEdit.submission.formData.get("value") as string;
@@ -132,7 +147,7 @@ const ItemRow = ({item}: {item: HalfItem}) => {
 	}
 
 	return (
-		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete}>
+		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete} $isSubList={isSubList}>
 			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
 				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
 			</SItemText>
@@ -142,27 +157,13 @@ const ItemRow = ({item}: {item: HalfItem}) => {
 	);
 };
 
-const SublistRow = ({item}: {item: HalfItem}) => {
-	const subList = item.childList;
-	if (!subList) return null;
-	return (
-		<Link to={`/${subList.id}`}>
-			<SRow $isSubList>
-				<SItemText>
-					{subList.name}
-				</SItemText>
-			</SRow>
-		</Link>
-	)
-}
-
 const SInput = styled.input`
 	margin-left: 0;
 	margin-right: 1rem;
 	width: 80%;
 	user-select: text;
 	color: rgb(0 0 0);
-	height: 1.8rem;
+	height: 1.6rem;
 	border-width: 1px;
 	border-radius: 0.1rem;
 	font-size: 0.66em;
@@ -226,10 +227,6 @@ const AddItem = () => {
 	);
 };
 
-const Row = ({item}: {item: HalfItem}) => {
-	return (item.childListId === null ? <ItemRow item={item}/> : <SublistRow item={item}/>)
-}
-
 const SMainList = styled.ul`
 	display: flex;
 	flex-direction: column;
@@ -270,19 +267,19 @@ const SBack = styled.span`
 const Header = ({list}: {list: HalfList}) => {
 	const onUpdate = useBroadcastUpdate();
 	const fetcher = useFetcher();
-	const doSubmit = (name: string) => {
+	const doSubmit = (value: string) => {
 		setIsEditing(false);
-		if (!name || name === list.name) return;
+		if (!value || value === list.name) return;
 		onUpdate();
 		fetcher.submit(
-			{name},
+			{value},
 			{method: "post", action: `${list.id}/rename`}
 		);
 	}
 	let name = list.name;
 	const isWaiting = fetcher.type == "actionSubmission" || fetcher.type == "actionReload";
 	if (isWaiting) {
-		name = fetcher.submission.formData.get("name") as string;
+		name = fetcher.submission.formData.get("value") as string;
 	}
 	const [isEditing, setIsEditing] = React.useState(false);
 
