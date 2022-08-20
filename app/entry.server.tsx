@@ -2,6 +2,7 @@ import type { EntryContext } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { renderToString } from "react-dom/server";
 import { ServerStyleSheet } from "styled-components";
+import { resetServerContext } from 'react-beautiful-dnd';
 
 export default function handleRequest(
   request: Request,
@@ -9,6 +10,7 @@ export default function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext
 ) {
+	resetServerContext();
 	const sheet = new ServerStyleSheet();
 	const markup = renderToString(
 		sheet.collectStyles(

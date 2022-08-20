@@ -10,7 +10,7 @@ const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	fill: var(--${props => props.$isCompleted ? "blue" : "white"});
 `
 
-const Delete = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
+const Delete = ({onClick, $isCompleted}: {onClick: (event: React.MouseEvent) => void, $isCompleted: boolean}) => {
 	return (
 		<SDeleteSVG $isCompleted={$isCompleted} version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
 			viewBox="0 0 490.584 490.584" onClick={onClick}>

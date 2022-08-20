@@ -1,4 +1,5 @@
 import * as React from "react";
+import {DragDropContext, Draggable, Droppable, DropResult} from "react-beautiful-dnd";
 import {
 	useFetcher,
 	useNavigate,
@@ -13,7 +14,7 @@ const DeleteButton = ({onClick, $isCompleted}: {onClick: () => void, $isComplete
 	return <Delete onClick={onClick} $isCompleted={$isCompleted}/>
 };
 
-const EditButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
+const EditButton = ({onClick, $isCompleted}: {onClick: (event: React.MouseEvent) => void, $isCompleted: boolean}) => {
 	return <Edit onClick={onClick} $isCompleted={$isCompleted}/>
 };
 
@@ -32,8 +33,10 @@ const SRow = styled.li<{
 	$isWaitingDelete?: boolean,
 	$isSubList?: boolean,
 	$fontSize?: string,
+	$isDragging?: boolean,
 }>`
 	display: flex;
+	filter: brightness(${props => props.$isDragging ? (props.$isCompleted ? "0.9" : "1.7") : "1"});
 	min-height: ${props => props.$isWaitingDelete ? "0.2rem" : props.$isSubList ? "3.5rem" : "3rem"};
 	transition: min-height 500ms cubic-bezier(0.22, 1, 0.36, 1);
 	padding-left: ${props => props.$isSubList ? "1rem" : "0.8rem"};
@@ -68,7 +71,7 @@ const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const Row = ({item}: {item: HalfItem}) => {
+const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, provided: any, isDragging: boolean, isWaitingReorder}) => {
 	const onUpdate = useBroadcastUpdate();
 
 	const isSubList = !!item.childListId;
@@ -127,6 +130,10 @@ const Row = ({item}: {item: HalfItem}) => {
 			doSubmit((event.target as HTMLInputElement).value.trim());
 		}
 	}
+	const handleEdit = (event: React.MouseEvent) => {
+		setIsEditing(true);
+		((event.target as Element).parentNode as Element)?.scrollTo(0, 0)
+	}
 
 	// Deleting item
 	const fetcherDelete = useFetcher();
@@ -141,17 +148,38 @@ const Row = ({item}: {item: HalfItem}) => {
 
 	if (isWaitingDelete) {
 		return (
-			<SRow $isCompleted={completed} $isWaiting={isWaitingCheck || isWaitingEdit} $isWaitingDelete={isWaitingDelete}/>
+			<SRow
+				ref={provided.innerRef}
+				{...provided.draggableProps}
+				{...provided.dragHandleProps}
+				$isCompleted={completed}
+				$isWaiting={isWaitingCheck || isWaitingEdit}
+				$isWaitingDelete={isWaitingDelete}
+			/>
 		);
 	}
 
+	const displayedValue = value; //`${item.order}-${value}`;
+
 	return (
-		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete} $isSubList={isSubList}>
+		<SRow
+			ref={provided.innerRef}
+			{...provided.draggableProps}
+			{...provided.dragHandleProps}
+			$isCompleted={completed}
+			$isWaiting={isWaitingCheck}
+			$isWaitingDelete={isWaitingDelete}
+			$isSubList={isSubList}
+			$isDragging={isDragging || isWaitingReorder}
+		>
 			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
-				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
+				{isEditing
+						? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/>
+					: displayedValue
+				}
 			</SItemText>
 			<DeleteButton onClick={handleDelete} $isCompleted={completed && !isWaitingCheck}/>
-			<EditButton onClick={() => setIsEditing(true)} $isCompleted={completed && !isWaitingCheck}/>
+			<EditButton onClick={handleEdit} $isCompleted={completed && !isWaitingCheck}/>
 		</SRow>
 	);
 };
@@ -165,7 +193,7 @@ const SInput = styled.input`
 	height: 1.6rem;
 	border-width: 1px;
 	border-radius: 0.1rem;
-	font-size: 0.66em;
+	font-size: max(16px, 0.66em);
 	font-weight: inherit;
 	&:focus::placeholder {
 		color: var(--light-grey);
@@ -371,29 +399,58 @@ export type HalfList = {
 
 const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 	const onUpdate = useBroadcastUpdate();
-	const fetcher = useFetcher();
+
+	const fetcherAddSublist = useFetcher();
 	const handleAddSubList = () => {
 		onUpdate();
-		fetcher.submit(
+		fetcherAddSublist.submit(
 			{ value: "Nouvelle liste", isSubList: "true" },
 			{ method: "post", action: `${list.id}/add` }
 		);
 	};
 
+	const fetcherReorder = useFetcher();
+	const handleDragEnd = (result: DropResult) => {
+		if (!result.destination) return;
+		onUpdate();
+		fetcherReorder.submit(
+			{ itemId: result.draggableId, sourceIndex: `${result.source.index}`, destinationIndex: `${result.destination.index}` },
+			{ method: "post", action: `${list.id}/reorder` }
+		);
+	}
+	const isWaiting = fetcherReorder.type == "actionSubmission" || fetcherReorder.type == "actionReload";
+	const waitingId = isWaiting && fetcherReorder.submission.formData.get("itemId") as string;
+	if (isWaiting) {
+		list = JSON.parse(JSON.stringify(list));
+		const [item] = list.items.splice(Number(fetcherReorder.submission.formData.get("sourceIndex")), 1);
+		list.items.splice(Number(fetcherReorder.submission.formData.get("destinationIndex")), 0, item);
+	}
+
 	const navigate = useNavigate();
 
 	return (
-		<SMain $isLoading={isLoading}>
-			{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
-			<Header list={list}/>
-			<SMainList>
-				{list.parent && <AddItem/>}
-				{[...list.items].reverse().map((item) => (
-					<Row key={item.id} item={item}/>
-				))}
-			</SMainList>
-			{(!list.parent) && <AddSubListSVG onClick={handleAddSubList}/>}
-		</SMain>
+		<DragDropContext onDragEnd={handleDragEnd}>
+			<SMain $isLoading={isLoading}>
+				{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
+				<Header list={list}/>
+				<Droppable droppableId={list.id}>
+					{provided => (
+						<SMainList ref={provided.innerRef} {...provided.droppableProps}>
+							{list.parent && <AddItem/>}
+							{list.items.map((item, i) => (
+								<Draggable key={item.id} draggableId={item.id} index={i}>
+									{(provided, snapshot) => (
+										<Row provided={provided} isDragging={snapshot.isDragging} item={item} isWaitingReorder={waitingId && waitingId == item.id}/>
+									)}
+								</Draggable>
+							))}
+							{provided.placeholder}
+						</SMainList>
+					)}
+				</Droppable>
+				{(!list.parent) && <AddSubListSVG onClick={handleAddSubList}/>}
+			</SMain>
+		</DragDropContext>
 	);
 };
 

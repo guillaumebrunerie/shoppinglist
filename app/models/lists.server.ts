@@ -21,7 +21,10 @@ export const getList = async (id: string): Promise<FullList | null> => {
 							items: {
 								include: {
 									childList: true,
-								}
+								},
+								orderBy: {
+									order: "asc",
+								},
 							}
 						}
 					},
@@ -30,7 +33,10 @@ export const getList = async (id: string): Promise<FullList | null> => {
 							items: {
 								include: {
 									childList: true,
-								}
+								},
+								orderBy: {
+									order: "asc",
+								},
 							}
 						}
 					},
@@ -46,7 +52,10 @@ export const getList = async (id: string): Promise<FullList | null> => {
 							items: {
 								include: {
 									childList: true,
-								}
+								},
+								orderBy: {
+									order: "asc",
+								},
 							}
 						}
 					},
@@ -55,12 +64,15 @@ export const getList = async (id: string): Promise<FullList | null> => {
 							items: {
 								include: {
 									childList: true,
-								}
-							}
-						}
+								},
+								orderBy: {
+									order: "asc",
+								},
+							},
+						},
 					},
 				},
-			}
+			},
 		},
 	});
 };
@@ -97,17 +109,26 @@ export const renameList = async (id: string, name: string) => {
 	});
 };
 
-export const getNextOrder = async (listId: string) => {
+export const getOrderFirst = async (listId: string) => {
+	const firstItem = await prisma.item.findFirst({
+		where: { listId },
+		orderBy: { order: "asc" },
+	});
+
+	return midString("", firstItem?.order || "");
+};
+
+export const getOrderLast = async (listId: string) => {
 	const lastItem = await prisma.item.findFirst({
 		where: { listId },
 		orderBy: { order: "desc" },
 	});
 
 	return midString(lastItem?.order || "", "");
-}
+};
 
 export const addItem = async (listId: string, item: string) => {
-	const order = await getNextOrder(listId);
+	const order = await getOrderFirst(listId);
 	return await prisma.item.create({
 		data: {
 			order,
@@ -118,7 +139,7 @@ export const addItem = async (listId: string, item: string) => {
 };
 
 export const addSubList = async (listId: string, name: string, color: string) => {
-	const order = await getNextOrder(listId);
+	const order = await getOrderLast(listId);
 	const subList = await prisma.list.create({
 		data: {
 			name,
@@ -178,3 +199,33 @@ export const setCompleted = async (id: string, completed: boolean) => {
 // 		})
 // 	})
 // }
+
+export const reorderItem = async (listId: string, itemId: string, sourceIndex: number, destinationIndex: number) => {
+	const items = await prisma.item.findMany({
+		where: {
+			listId,
+		},
+		orderBy: { order: "asc" },
+		select: {
+			id: true,
+			order: true,
+		},
+	});
+	const [source] = items.splice(sourceIndex, 1);
+	if (source.id !== itemId || destinationIndex > items.length) {
+		console.error("Error", source.id, itemId, destinationIndex, items.length);
+		return;
+	}
+	const prev = destinationIndex == 0 ? "" : items[destinationIndex - 1].order;
+	const next = destinationIndex == items.length ? "" : items[destinationIndex].order;
+	const newOrder = midString(prev, next);
+
+	await prisma.item.update({
+		where: {
+			id: itemId,
+		},
+		data: {
+			order: newOrder,
+		}
+	});
+};
