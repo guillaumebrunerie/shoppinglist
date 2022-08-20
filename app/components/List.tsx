@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-	Link,
 	useFetcher,
 	useNavigate,
 	useParams,
@@ -25,7 +24,7 @@ const useBroadcastUpdate = () => {
 	return React.useCallback(() => {
 		socket?.emit("update", listId);
 	}, [socket, listId]);
-}
+};
 
 const SRow = styled.li<{
 	$isCompleted?: boolean,
@@ -59,7 +58,7 @@ const SRow = styled.li<{
 		padding: 0 1rem;
 		min-height: inherit;
 	}
-`
+`;
 
 const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	flex-shrink: 0;
@@ -176,7 +175,7 @@ const SInput = styled.input`
 		outline: 1.5px solid var(--white);
 	}
 	caret-color: var(--grey);
-`
+`;
 
 const AddItem = () => {
 	const onUpdate = useBroadcastUpdate();
@@ -245,7 +244,7 @@ const SHeader = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	color: var(--blue);
-`
+`;
 
 const SName = styled.span<{$isWaiting: boolean}>`
 	margin: 0;
@@ -253,7 +252,7 @@ const SName = styled.span<{$isWaiting: boolean}>`
 	font-size: 2.2rem;
 	font-weight: bold;
 	${props => props.$isWaiting && "opacity: 0.5;"}
-`
+`;
 
 const SBack = styled.span`
 	display: flex;
@@ -262,7 +261,7 @@ const SBack = styled.span`
 	color: var(--blue);
 	font-size: 1.3rem;
 	line-height: 1.5rem;
-`
+`;
 
 const Header = ({list}: {list: HalfList}) => {
 	const onUpdate = useBroadcastUpdate();
@@ -300,7 +299,7 @@ const Header = ({list}: {list: HalfList}) => {
 			</SName>
 		</SHeader>
 	)
-}
+};
 
 const SBackThing = styled.svg`
 	height: 1.2rem;
@@ -312,13 +311,13 @@ const SBackThing = styled.svg`
 	stroke-width: 14px;
 	stroke-linecap: round;
 	stroke-linejoin: round;
-`
+`;
 
 const BackThing = () => (
 	<SBackThing viewBox="0 0 60 100">
 		<path d="M 50 90 L 10 50 L 50 10"/>
 	</SBackThing>
-)
+);
 
 const SSubList = styled.svg`
 	position: fixed;
@@ -336,19 +335,19 @@ const SSubList = styled.svg`
 		fill: none;
 		stroke-linecap: round;
 	}
-`
+`;
 
 const SMain = styled.main<{$isLoading: boolean}>`
 	opacity: ${props => props.$isLoading ? "0.8" : "1"};
 	transition: opacity ${props => props.$isLoading ? "0" : "100ms"} ease;
-`
+`;
 
 const AddSubListSVG = (props: {onClick: () => void}) => (
 	<SSubList viewBox="0 0 100 100" {...props}>
 		<circle cx="50" cy="50" r="50"/>
 		<path d="M 50 25 L 50 75 M 25 50 L 75 50"/>
 	</SSubList>
-)
+);
 
 type HalfItem = {
 	id: string,
@@ -368,7 +367,7 @@ export type HalfList = {
 	name: string,
 	parent: {listId: string} | null,
 	items: HalfItem[],
-}
+};
 
 const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 	const onUpdate = useBroadcastUpdate();
