@@ -149,7 +149,7 @@ const Row = ({item}: {item: HalfItem}) => {
 	return (
 		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete} $isSubList={isSubList}>
 			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
-				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : `${item.order}-${value}`}
+				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
 			</SItemText>
 			<DeleteButton onClick={handleDelete} $isCompleted={completed && !isWaitingCheck}/>
 			<EditButton onClick={() => setIsEditing(true)} $isCompleted={completed && !isWaitingCheck}/>
