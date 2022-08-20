@@ -1,6 +1,7 @@
 import {prisma} from "~/db.server";
 
 import type {List, Item} from "@prisma/client";
+import { midString } from "./utils.server";
 export type {Item} from "@prisma/client";
 
 type NamedItem = Item & {childList: List | null};
@@ -101,7 +102,8 @@ export const getNextOrder = async (listId: string) => {
 		where: { listId },
 		orderBy: { order: "desc" },
 	});
-	return lastItem ? lastItem.order + 1 : 0;
+
+	return midString(lastItem?.order || "", "");
 }
 
 export const addItem = async (listId: string, item: string) => {

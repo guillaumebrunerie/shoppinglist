@@ -352,7 +352,7 @@ const AddSubListSVG = (props: {onClick: () => void}) => (
 
 type HalfItem = {
 	id: string,
-	order: number,
+	order: string,
 	listId: string,
 	completed: boolean,
 	value?: string | null,
