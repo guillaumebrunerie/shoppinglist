@@ -162,17 +162,17 @@ export const setCompleted = async (id: string, completed: boolean) => {
 	});
 };
 
-export const updateDatabase = async () => {
-	const items = await prisma.item.findMany();
-	items.forEach(async item => {
-		const newOrder = String.fromCharCode(98 + item.order);
-		await prisma.item.update({
-			where: {
-				id: item.id,
-			},
-			data: {
-				orderTmp: newOrder,
-			}
-		})
-	})
-}
+// export const updateDatabase = async () => {
+// 	const items = await prisma.item.findMany();
+// 	items.forEach(async item => {
+// 		const newOrder = String.fromCharCode(98 + item.order);
+// 		await prisma.item.update({
+// 			where: {
+// 				id: item.id,
+// 			},
+// 			data: {
+// 				orderTmp: newOrder,
+// 			}
+// 		})
+// 	})
+// }

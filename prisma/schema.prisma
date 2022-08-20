@@ -17,8 +17,7 @@ model List {
 
 model Item {
   id       String @id @default(cuid())
-  order    Int
-  orderTmp String @default("")
+  order String
 
   // Unused for sublists
   value     String?
