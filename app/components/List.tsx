@@ -411,7 +411,7 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 
 	const fetcherReorder = useFetcher();
 	const handleDragEnd = (result: DropResult) => {
-		if (!result.destination) return;
+		if (!result.destination || result.source.index === result.destination.index) return;
 		onUpdate();
 		fetcherReorder.submit(
 			{ itemId: result.draggableId, sourceIndex: `${result.source.index}`, destinationIndex: `${result.destination.index}` },

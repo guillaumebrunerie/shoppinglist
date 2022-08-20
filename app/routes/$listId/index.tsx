@@ -95,5 +95,5 @@ export default function ListPage() {
 		}
 	}
 
-	return <List list={displayedList} isLoading={isLoading}/>;
+	return <List key={displayedList.id} list={displayedList} isLoading={isLoading}/>;
 }
