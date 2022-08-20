@@ -149,7 +149,7 @@ const Row = ({item}: {item: HalfItem}) => {
 	return (
 		<SRow $isCompleted={completed} $isWaiting={isWaitingCheck} $isWaitingDelete={isWaitingDelete} $isSubList={isSubList}>
 			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
-				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : value}
+				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : `${item.order}-${item.orderTmp}-${value}`}
 			</SItemText>
 			<DeleteButton onClick={handleDelete} $isCompleted={completed && !isWaitingCheck}/>
 			<EditButton onClick={() => setIsEditing(true)} $isCompleted={completed && !isWaitingCheck}/>
@@ -352,6 +352,8 @@ const AddSubListSVG = (props: {onClick: () => void}) => (
 
 type HalfItem = {
 	id: string,
+	order: number,
+	orderTmp: string,
 	listId: string,
 	completed: boolean,
 	value?: string | null,
