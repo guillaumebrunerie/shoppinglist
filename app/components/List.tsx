@@ -71,7 +71,7 @@ const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, provided: any, isDragging: boolean, isWaitingReorder}) => {
+const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, provided: any, isDragging: boolean, isWaitingReorder: boolean}) => {
 	const onUpdate = useBroadcastUpdate();
 
 	const isSubList = !!item.childListId;
@@ -193,7 +193,7 @@ const SInput = styled.input`
 	height: 1.6rem;
 	border-width: 1px;
 	border-radius: 0.1rem;
-	font-size: max(16px, 0.66em);
+	font-size: max(16px, 0.66em); // Needs to be at least 16px for iOS
 	font-weight: inherit;
 	&:focus::placeholder {
 		color: var(--light-grey);
@@ -440,7 +440,7 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 							{list.items.map((item, i) => (
 								<Draggable key={item.id} draggableId={item.id} index={i}>
 									{(provided, snapshot) => (
-										<Row provided={provided} isDragging={snapshot.isDragging} item={item} isWaitingReorder={waitingId && waitingId == item.id}/>
+										<Row provided={provided} isDragging={snapshot.isDragging} item={item} isWaitingReorder={isWaiting && waitingId == item.id}/>
 									)}
 								</Draggable>
 							))}
