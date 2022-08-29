@@ -1,14 +1,16 @@
 import * as React from "react";
-import {DragDropContext, Draggable, Droppable, DropResult} from "react-beautiful-dnd";
+import {DragDropContext, Draggable, Droppable, type DropResult} from "react-beautiful-dnd";
 import {
+	Link,
 	useFetcher,
 	useNavigate,
 	useParams,
 } from "@remix-run/react";
-import {useSocket} from "~/context";
+import {useBroadcastUpdate} from "~/socket";
 import styled from "styled-components";
-import Edit from "~/components/Edit";
-import Delete from "~/components/Delete";
+import Edit from "./Edit";
+import Delete from "./Delete";
+import Undo from "./Undo";
 
 const DeleteButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
 	return <Delete onClick={onClick} $isCompleted={$isCompleted}/>
@@ -18,13 +20,8 @@ const EditButton = ({onClick, $isCompleted}: {onClick: (event: React.MouseEvent)
 	return <Edit onClick={onClick} $isCompleted={$isCompleted}/>
 };
 
-const useBroadcastUpdate = () => {
-	const params = useParams();
-	const listId = params.listId as string;
-	const socket = useSocket();
-	return React.useCallback(() => {
-		socket?.emit("update", listId);
-	}, [socket, listId]);
+const RestoreButton = ({onClick, $isCompleted}: {onClick: (event: React.MouseEvent) => void, $isCompleted: boolean}) => {
+	return <Undo onClick={onClick} $isCompleted={$isCompleted}/>
 };
 
 const SRow = styled.li<{
@@ -46,7 +43,7 @@ const SRow = styled.li<{
 	font-size: ${props => props.$isSubList ? "1.5rem" : "1.2rem"};
 	line-height: 2rem;
 	${props => props.$isWaiting && "opacity: 0.5;"}
-	background-color: var(--${props => (props.$isCompleted && !props.$isWaiting) ? "white" : "blue"});
+	background-color: var(${props => (props.$isCompleted && !props.$isWaiting) ? "--background" : "--primary"});
 
 	overflow: scroll;
 	scroll-snap-type: x mandatory;
@@ -66,68 +63,61 @@ const SRow = styled.li<{
 const SItemText = styled.span<{$isCompleted?: boolean, $isWaiting?: boolean}>`
 	flex-shrink: 0;
 	width: 100%;
-	color: var(--${props => props.$isCompleted || props.$isWaiting ? "grey" : "white"});
+	color: var(${props => props.$isCompleted || props.$isWaiting ? "--grey" : "--background"});
 	cursor: pointer;
 	${props => props.$isCompleted && "text-decoration-line: line-through;"}
 `;
 
-const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, provided: any, isDragging: boolean, isWaitingReorder: boolean}) => {
-	const onUpdate = useBroadcastUpdate();
+const SItemTextFlex = styled(SItemText)`
+	flex-shrink: 1;
+`
 
+const Row = ({item, provided, isDragging, isWaitingReorder, isWaitingDelete}: {item: HalfItem, provided: any, isDragging: boolean, isWaitingReorder: boolean, isWaitingDelete: boolean}) => {
 	const isSubList = !!item.childListId;
 
 	const navigate = useNavigate();
 
 	// Toggling checked state
-	const fetcherCheck = useFetcher();
-	const handleCheck = () => {
-		if (isEditing) return;
-		if (isSubList) {
-			navigate(`/${item.childList?.id}`)
-			return;
-		}
-		fetcherCheck.submit(
-			{ id: item.id, currentState: `${completed}` },
-			{ method: "post", action: `${item.listId}/toggle` }
-		);
-		onUpdate();
-	};
+	const [waitingCheck, doCheck] = useOptimisticAction(
+		() => {
+			if (isEditing) return null;
+			if (isSubList) {
+				navigate(`/${item.childList?.id}`)
+				return null;
+			}
+			return {action: `${item.listId}/toggle`, id: item.id, currentState: `${completed}`};
+		},
+		item.listId,
+	);
 	let completed = !isSubList && item.completed;
-	const isWaitingCheck = (fetcherCheck.type == "actionSubmission" || fetcherCheck.type === "actionReload");
-	if (isWaitingCheck) {
-		completed = fetcherCheck.submission.formData.get("currentState") === "false"
+	if (waitingCheck) {
+		completed = waitingCheck.currentState === "false"
 	}
 
 	// Editing item
-	const fetcherEdit = useFetcher();
-	const doSubmit = (value: string) => {
-		setIsEditing(false);
-		if (!value || value === item.value) return;
-		if (isSubList) {
-			fetcherEdit.submit(
-				{value},
-				{method: "post", action: `${item.childListId}/rename`},
-			);
-		} else {
-			fetcherEdit.submit(
-				{id: item.id, value},
-				{method: "post", action: `${item.listId}/edit`}
-			);
-		}
-		onUpdate();
-	}
-	let value = (isSubList ? item.childList?.name : item?.value) as string;
-	const isWaitingEdit = (fetcherEdit.type == "actionSubmission" || fetcherEdit.type === "actionReload");
-	if (isWaitingEdit) {
-		value = fetcherEdit.submission.formData.get("value") as string;
-	}
 	const [isEditing, setIsEditing] = React.useState(false);
+	const [waitingEdit, doEdit] = useOptimisticAction(
+		(value: string) => {
+			setIsEditing(false);
+			if (!value || value === item.value) return null;
+			if (isSubList) {
+				return {action: `${item.childListId}/rename`, id: "", value};
+			} else {
+				return {action: `${item.listId}/edit`, id: item.id, value};
+			}
+		},
+		item.listId,
+	);
+	let value = (isSubList ? item.childList?.name : item?.value) as string;
+	if (waitingEdit) {
+		value = waitingEdit.value as string;
+	}
 	const handleBlur = (event: React.FocusEvent) => {
-		doSubmit((event.target as HTMLInputElement).value.trim());
+		doEdit((event.target as HTMLInputElement).value.trim());
 	}
 	const handleKeyUp = (event: React.KeyboardEvent) => {
 		if (event.key == "Enter") {
-			doSubmit((event.target as HTMLInputElement).value.trim());
+			doEdit((event.target as HTMLInputElement).value.trim());
 		}
 	}
 	const handleEdit = (event: React.MouseEvent) => {
@@ -136,25 +126,17 @@ const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, pr
 	}
 
 	// Deleting item
-	const fetcherDelete = useFetcher();
-	const handleDelete = () => {
-		fetcherDelete.submit(
-			{ id: item.id },
-			{ method: "post", action: `${item.listId}/delete` }
-		);
-		onUpdate();
-	};
-	const isWaitingDelete = (fetcherDelete.type == "actionSubmission" || fetcherDelete.type === "actionReload");
+	const [waitingDelete, doDelete] = useOptimisticAction(
+		() => ({action: `${item.listId}/delete`, id: item.id}),
+		item.listId,
+	);
 
-	if (isWaitingDelete) {
+	if (isWaitingDelete || waitingDelete) {
 		return (
 			<SRow
-				ref={provided.innerRef}
-				{...provided.draggableProps}
-				{...provided.dragHandleProps}
 				$isCompleted={completed}
-				$isWaiting={isWaitingCheck || isWaitingEdit}
-				$isWaitingDelete={isWaitingDelete}
+				$isWaiting={!!waitingCheck || !!waitingEdit}
+				$isWaitingDelete
 			/>
 		);
 	}
@@ -167,19 +149,19 @@ const Row = ({item, provided, isDragging, isWaitingReorder}: {item: HalfItem, pr
 			{...provided.draggableProps}
 			{...provided.dragHandleProps}
 			$isCompleted={completed}
-			$isWaiting={isWaitingCheck}
-			$isWaitingDelete={isWaitingDelete}
+			$isWaiting={!!waitingCheck}
+			$isWaitingDelete={!!waitingDelete}
 			$isSubList={isSubList}
 			$isDragging={isDragging || isWaitingReorder}
 		>
-			<SItemText onClick={handleCheck} $isCompleted={completed} $isWaiting={isWaitingEdit}>
+			<SItemText onClick={doCheck} $isCompleted={completed} $isWaiting={!!waitingEdit}>
 				{isEditing
 						? <SInput autoFocus enterKeyHint="done" defaultValue={value} onKeyUp={handleKeyUp} onBlur={handleBlur}/>
 					: displayedValue
 				}
 			</SItemText>
-			<DeleteButton onClick={handleDelete} $isCompleted={completed && !isWaitingCheck}/>
-			<EditButton onClick={handleEdit} $isCompleted={completed && !isWaitingCheck}/>
+			<DeleteButton onClick={doDelete} $isCompleted={completed && !waitingCheck}/>
+			<EditButton onClick={handleEdit} $isCompleted={completed && !waitingCheck}/>
 		</SRow>
 	);
 };
@@ -200,27 +182,24 @@ const SInput = styled.input`
 	}
 	&:focus {
 		outline-offset: 1px;
-		outline: 1.5px solid var(--white);
+		outline: 1.5px solid var(--background);
 	}
 	caret-color: var(--grey);
 `;
 
 const AddItem = () => {
-	const onUpdate = useBroadcastUpdate();
 	const params = useParams();
 	const listId = params.listId as string;
-	const fetcher = useFetcher();
 	const [text, setText] = React.useState("");
 
-	const doAdd = (value: string) => {
-		if (!value) return;
-		setText("");
-		fetcher.submit(
-			{ value },
-			{ method: "post", action: `${listId}/add` }
-		);
-		onUpdate();
-	};
+	const [waitingAdd, doAdd] = useOptimisticAction(
+		(value: string) => {
+			if (!value) return null;
+			setText("");
+			return {action: `${listId}/add`, value};
+		},
+		listId,
+	);
 
 	const handleChange = (event: React.ChangeEvent) => {
 		setText((event.target as HTMLInputElement).value);
@@ -243,10 +222,10 @@ const AddItem = () => {
 					onKeyDown={handleKeyDown}
 				/>
 			</SRow>
-			{(fetcher.type == "actionSubmission" || fetcher.type === "actionReload") && (
+			{waitingAdd && (
 				<SRow $isWaiting>
 					<SItemText>
-						{fetcher.submission.formData.get("value") as string}
+						{waitingAdd.value as string}
 					</SItemText>
 				</SRow>
 			)}
@@ -271,7 +250,7 @@ const SHeader = styled.div`
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	color: var(--blue);
+	color: var(--primary);
 `;
 
 const SName = styled.span<{$isWaiting: boolean}>`
@@ -286,47 +265,96 @@ const SBack = styled.span`
 	display: flex;
 	align-items: center;
 	padding: 0.75rem 0 0 0.25rem;
-	color: var(--blue);
+	color: var(--primary);
 	font-size: 1.3rem;
 	line-height: 1.5rem;
+	cursor: pointer;
 `;
 
-const Header = ({list}: {list: HalfList}) => {
-	const onUpdate = useBroadcastUpdate();
-	const fetcher = useFetcher();
-	const doSubmit = (value: string) => {
-		setIsEditing(false);
-		if (!value || value === list.name) return;
-		onUpdate();
-		fetcher.submit(
-			{value},
-			{method: "post", action: `${list.id}/rename`}
-		);
-	}
-	let name = list.name;
-	const isWaiting = fetcher.type == "actionSubmission" || fetcher.type == "actionReload";
-	if (isWaiting) {
-		name = fetcher.submission.formData.get("value") as string;
-	}
+const SMenuButton = styled.span`
+	font-size: 30px;
+	position: fixed;
+	top: 5px;
+	right: 10px;
+	z-index: 1;
+	cursor: pointer;
+`
+
+const SMenu = styled.div`
+	width: 200px;
+	background-color: var(--background);
+	position: absolute;
+	top: 40px;
+	right: -5px;
+	z-index: 1;
+	border: 2px solid var(--primary);
+	outline: 1px solid var(--background);
+	border-radius: 15px;
+	font-size: 1.1rem;
+	line-height: 2rem;
+	padding: 0.35rem 0.5rem;
+`
+
+const SBackdrop = styled.div`
+	background-color: black;
+	opacity: 30%;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+`
+
+const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
+	const [waiting, doRename] = useOptimisticAction(
+		(value: string) => {
+			setIsEditing(false);
+			if (!value || value === list.name) return null;
+			return {action: `${list.id}/rename`, value};
+		},
+		list.id,
+	)
+	const name = waiting?.value as string ?? list.name;
+
 	const [isEditing, setIsEditing] = React.useState(false);
 
 	const handleBlur = (event: React.FocusEvent) => {
-		doSubmit((event.target as HTMLInputElement).value.trim());
+		doRename((event.target as HTMLInputElement).value.trim());
 	}
 
 	const handleKeyUp = (event: React.KeyboardEvent) => {
 		if (event.key == "Enter") {
-			doSubmit((event.target as HTMLInputElement).value.trim());
+			doRename((event.target as HTMLInputElement).value.trim());
 		}
+	}
+
+	const [isOpen, setIsOpen] = React.useState(false);
+	const openMenu = () => {setIsOpen(true);}
+	const closeMenu = () => {setIsOpen(false);}
+
+	const handleClean = () => {
+		closeMenu();
+		doClean();
 	}
 
 	return (
 		<SHeader>
- 			<SName $isWaiting={isWaiting}>
+			<SName $isWaiting={!!waiting}>
 				{isEditing ? <SInput autoFocus enterKeyHint="done" defaultValue={name} onKeyUp={handleKeyUp} onBlur={handleBlur}/> : <span onClick={() => setIsEditing(true)}>{name}</span>}
 			</SName>
+			<SMenuButton>
+				<span onClick={openMenu}>{"\u2807"}</span>
+				{isOpen && (
+					<SMenu>
+						<span onClick={handleClean}>Nettoyer la liste</span>
+						<br/>
+						<Link to="/recentlyDeleted">Supprimés récemment</Link>
+					</SMenu>
+				)}
+				{isOpen && <SBackdrop onClick={closeMenu}/>}
+			</SMenuButton>
 		</SHeader>
-	)
+	);
 };
 
 const SBackThing = styled.svg`
@@ -334,7 +362,7 @@ const SBackThing = styled.svg`
 	width: 1.5rem;
 	flex: none;
 	cursor: pointer;
-	stroke: var(--blue);
+	stroke: var(--primary);
 	fill: none;
 	stroke-width: 14px;
 	stroke-linecap: round;
@@ -356,18 +384,24 @@ const SSubList = styled.svg`
 	flex: none;
 	cursor: pointer;
 	stroke: none;
-	fill: var(--blue);
+	fill: var(--primary);
 	path {
-		stroke: var(--white);
+		stroke: var(--background);
 		stroke-width: 10px;
 		fill: none;
 		stroke-linecap: round;
 	}
 `;
 
-const SMain = styled.main<{$isLoading: boolean}>`
+const SMain = styled.main<{$isLoading: boolean, $primaryColor?: string, $backgroundColor?: string}>`
 	opacity: ${props => props.$isLoading ? "0.8" : "1"};
 	transition: opacity ${props => props.$isLoading ? "0" : "100ms"} ease;
+
+	${props => props.$primaryColor && `--primary: ${props.$primaryColor};`}
+	${props => props.$backgroundColor && `--background: ${props.$backgroundColor};`}
+
+	background-color: var(--background);
+	height: 100vh;
 `;
 
 const AddSubListSVG = (props: {onClick: () => void}) => (
@@ -388,6 +422,7 @@ type HalfItem = {
 		id: string,
 		name: string,
 	} | null,
+	deletedAt?: string | null,
 };
 
 export type HalfList = {
@@ -398,33 +433,53 @@ export type HalfList = {
 };
 
 const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
-	const onUpdate = useBroadcastUpdate();
+	// TODO: optimistic ui
+	const [_ /*isWaitingAddSubList*/, handleAddSubList] = useOptimisticAction(
+		() => ({action: `${list.id}/add`, value: "Nouvelle liste", isSubList: "true"}),
+		list.id,
+	);
 
-	const fetcherAddSublist = useFetcher();
-	const handleAddSubList = () => {
-		onUpdate();
-		fetcherAddSublist.submit(
-			{ value: "Nouvelle liste", isSubList: "true" },
-			{ method: "post", action: `${list.id}/add` }
-		);
-	};
-
-	const fetcherReorder = useFetcher();
-	const handleDragEnd = (result: DropResult) => {
-		if (!result.destination || result.source.index === result.destination.index) return;
-		onUpdate();
-		fetcherReorder.submit(
-			{ itemId: result.draggableId, sourceIndex: `${result.source.index}`, destinationIndex: `${result.destination.index}` },
-			{ method: "post", action: `${list.id}/reorder` }
-		);
-	}
-	const isWaiting = fetcherReorder.type == "actionSubmission" || fetcherReorder.type == "actionReload";
-	const waitingId = isWaiting && fetcherReorder.submission.formData.get("itemId") as string;
-	if (isWaiting) {
+	const [waitingReorder, handleDragEnd] = useOptimisticAction(
+		(result: DropResult) => {
+			if (!result.destination || result.source.index === result.destination.index) return null;
+			return {
+				action: `${list.id}/reorder`,
+				itemId: result.draggableId,
+				sourceIndex: `${result.source.index}`,
+				destinationIndex: `${result.destination.index}`,
+			}
+		},
+		list.id,
+	);
+	if (waitingReorder) {
 		list = JSON.parse(JSON.stringify(list));
-		const [item] = list.items.splice(Number(fetcherReorder.submission.formData.get("sourceIndex")), 1);
-		list.items.splice(Number(fetcherReorder.submission.formData.get("destinationIndex")), 0, item);
+		const [item] = list.items.splice(Number(waitingReorder.sourceIndex), 1);
+		list.items.splice(Number(waitingReorder.destinationIndex), 0, item);
 	}
+
+	// const fetcherReorder = useFetcher();
+	// const handleDragEnd = (result: DropResult) => {
+	// 	if (!result.destination || result.source.index === result.destination.index) return;
+	// 	onUpdate(list.id);
+	// 	fetcherReorder.submit(
+	// 		{ itemId: result.draggableId, sourceIndex: `${result.source.index}`, destinationIndex: `${result.destination.index}` },
+	// 		{ method: "post", action: `${list.id}/reorder` }
+	// 	);
+	// }
+	// const isWaiting = fetcherReorder.type == "actionSubmission" || fetcherReorder.type == "actionReload";
+	// const waitingId = isWaiting && fetcherReorder.submission.formData.get("itemId") as string;
+	// if (isWaiting) {
+	// 	list = JSON.parse(JSON.stringify(list));
+	// 	const [item] = list.items.splice(Number(fetcherReorder.submission.formData.get("sourceIndex")), 1);
+	// 	list.items.splice(Number(fetcherReorder.submission.formData.get("destinationIndex")), 0, item);
+	// }
+
+	const completedIds = list.items.flatMap(item => item.completed ? [item.id] : []);
+	const [waitingClean, doClean] = useOptimisticAction(
+		() => ({action: `${list.id}/deleteMany`, ids: completedIds.join(",")}),
+		list.id,
+	);
+	const waitingIds = waitingClean && (waitingClean.ids as string).split(",");
 
 	const navigate = useNavigate();
 
@@ -432,7 +487,7 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 		<DragDropContext onDragEnd={handleDragEnd}>
 			<SMain $isLoading={isLoading}>
 				{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
-				<Header list={list}/>
+				<Header list={list} doClean={doClean}/>
 				<Droppable droppableId={list.id}>
 					{provided => (
 						<SMainList ref={provided.innerRef} {...provided.droppableProps}>
@@ -440,7 +495,13 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 							{list.items.map((item, i) => (
 								<Draggable key={item.id} draggableId={item.id} index={i}>
 									{(provided, snapshot) => (
-										<Row provided={provided} isDragging={snapshot.isDragging} item={item} isWaitingReorder={isWaiting && waitingId == item.id}/>
+										<Row
+											provided={provided}
+											isDragging={snapshot.isDragging}
+											item={item}
+											isWaitingReorder={!!waitingReorder && waitingReorder.itemId == item.id}
+											isWaitingDelete={!!waitingIds && waitingIds.includes(item.id)}
+										/>
 									)}
 								</Draggable>
 							))}
@@ -455,3 +516,97 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 };
 
 export default List;
+
+// Not perfect yet
+const useOptimisticAction = <T extends unknown[]>(callback: (...args: T) => {action: string, [name: string]: string} | null, updateKey: string) => {
+	const onUpdate = useBroadcastUpdate();
+	const fetcher = useFetcher();
+	const handle = (...args: T) => {
+		const result = callback(...args)
+		if (!result) return;
+		const {action, ...props} = result;
+		fetcher.submit(
+			props,
+			{method: "post", action},
+		);
+		onUpdate(updateKey);
+	};
+	const waiting = (fetcher.type == "actionSubmission" || fetcher.type == "actionReload") ? Object.fromEntries(fetcher.submission.formData) : null;
+
+	return [waiting, handle] as const;
+}
+
+const RecentlyDeletedRow = ({item}: {item: HalfItem}) => {
+	const isSubList = !!item.childListId;
+	const displayedValue = isSubList ? item.childList?.name : item?.value as string;
+
+	const [isWaitingRestore, handleRestore] = useOptimisticAction(
+		() => ({action: "restore", id: item.id}),
+		item.listId,
+	)
+
+	if (isWaitingRestore) {
+		return (
+			<SRow
+				$isCompleted={item.completed}
+				$isSubList={isSubList}
+				$isWaitingDelete={!!isWaitingRestore}
+			/>
+		);
+	}
+
+	return (
+		<SRow
+			$isCompleted={item.completed}
+			$isSubList={isSubList}
+		>
+			<SItemTextFlex $isCompleted={item.completed}>
+				{displayedValue}
+			</SItemTextFlex>
+			<RestoreButton onClick={handleRestore} $isCompleted={item.completed}/>
+		</SRow>
+	)
+};
+
+const SDateHeader = styled.div`
+	padding-left: 0.25rem;
+	padding-top: 0.75rem;
+	padding-bottom: 0.25rem;
+	color: var(--primary);
+
+	&:empty {
+		display: none;
+	}
+`;
+
+const getDateHeader = (from: HalfItem | undefined, to: HalfItem) => {
+	if (!to.deletedAt) throw new Error("error");
+	if (from && !from.deletedAt) throw new Error("error");
+	const options = {day: "numeric", month: "long", hour: "numeric", minute: "numeric"} as const;
+	const strTo = new Intl.DateTimeFormat("fr-FR", options).format(new Date(to.deletedAt));
+	const strFrom = from && from.deletedAt ? new Intl.DateTimeFormat("fr-FR", options).format(new Date(from.deletedAt)) : "";
+	return strTo === strFrom ? null : `(le ${strTo})`;
+};
+
+export const RecentlyDeletedList = ({items, isLoading}: {items: HalfItem[], isLoading: boolean}) => {
+	const navigate = useNavigate();
+
+	return (
+		<SMain $isLoading={isLoading} $primaryColor="#444">
+			<SBack onClick={() => navigate("/")}><BackThing/>Retour</SBack>
+			<SHeader>
+				<SName $isWaiting={false}>Supprimés récemment</SName>
+			</SHeader>
+			<SMainList>
+				{items.map((item, i) => (
+					<React.Fragment key={item.id}>
+						<SDateHeader>
+							{getDateHeader(items[i - 1], items[i])}
+						</SDateHeader>
+						<RecentlyDeletedRow item={item}/>
+					</React.Fragment>
+				))}
+			</SMainList>
+		</SMain>
+	);
+};

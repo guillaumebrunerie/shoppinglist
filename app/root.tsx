@@ -11,7 +11,7 @@ import {
 	useMatches,
 } from "@remix-run/react";
 import io, {type Socket} from "socket.io-client";
-import {SocketProvider} from "./context";
+import {SocketProvider} from "./socket";
 import { createGlobalStyle } from "styled-components";
 
 let isMount = true;
@@ -29,11 +29,10 @@ const GlobalStyles = createGlobalStyle`
 	body, html {
 		height: 100%;
 		margin: 0;
-		--white: #F0F0F0;
+		--background: #F0F0F0;
 		--grey: #ABAFB1;
-		--blue: #142136;
+		--primary: #142136;
 		--light-grey: #CCCCCC;
-		background-color: var(--white);
 		font-family: '${font}', sans-serif;
 		text-size-adjust: none;
 		box-sizing: border-box;

@@ -1,5 +1,4 @@
 import * as React from "react";
-import {DragDropContext, Droppable} from "react-beautiful-dnd";
 
 import {
 	useLoaderData,
@@ -10,7 +9,7 @@ import {
 } from "@remix-run/react";
 import {json, type LoaderArgs} from "@remix-run/node";
 import {getList} from "~/models/lists.server";
-import {useSocket} from "~/context";
+import {useReloadOnUpdate} from "~/socket";
 import List, { type HalfList } from "~/components/List";
 
 export const loader = async ({ params }: LoaderArgs) => {
@@ -28,20 +27,10 @@ export default function ListPage() {
 	const listId = params["listId"];
 	let list = useLoaderData<typeof loader>();
 
-	// Update shown data when we receive an update message from the websocket
-	const submit = useSubmit();
-	const socket = useSocket();
-	React.useEffect(() => {
-		const listener = (updatedListId: string) => {
-			if (updatedListId === listId) {
-				submit(null, {method: "post"});
-			}
-		};
-		socket?.on("update", listener);
-		return () => void socket?.off("update", listener);
-	}, [socket, listId, submit]);
+	useReloadOnUpdate(listId);
 
 	// Create root list
+	const submit = useSubmit();
 	const handleCreate = () => {
 		submit(null, { method: "post", action: `${listId}/create` });
 	};

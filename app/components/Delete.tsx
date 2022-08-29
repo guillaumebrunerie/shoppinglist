@@ -5,8 +5,8 @@ const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	width: 1.5rem;
 	flex: none;
 	cursor: pointer;
-	stroke: var(--${props => props.$isCompleted ? "blue" : "white"});
-	fill: var(--${props => props.$isCompleted ? "blue" : "white"});
+	stroke: var(${props => props.$isCompleted ? "--primary" : "--background"});
+	fill: var(${props => props.$isCompleted ? "--primary" : "--background"});
 	stroke-width: 5px;
 `
 const Edit = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {

@@ -5,9 +5,9 @@ const SDeleteSVG = styled.svg<{$isCompleted: boolean}>`
 	width: 1.5rem;
 	flex: none;
 	cursor: pointer;
-	stroke: var(--${props => props.$isCompleted ? "white" : "blue"});
+	stroke: var(${props => props.$isCompleted ? "--background" : "--primary"});
 	stroke-width: 10px;
-	fill: var(--${props => props.$isCompleted ? "blue" : "white"});
+	fill: var(${props => props.$isCompleted ? "--primary" : "--background"});
 `
 
 const Delete = ({onClick, $isCompleted}: {onClick: (event: React.MouseEvent) => void, $isCompleted: boolean}) => {

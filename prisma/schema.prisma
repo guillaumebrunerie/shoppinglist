@@ -4,7 +4,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 model List {
@@ -16,8 +17,10 @@ model List {
 }
 
 model Item {
-  id       String @id @default(cuid())
+  id    String @id @default(cuid())
   order String
+
+  deletedAt DateTime?
 
   // Unused for sublists
   value     String?
