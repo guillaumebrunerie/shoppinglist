@@ -10,7 +10,6 @@ import {
 	useLocation,
 	useMatches,
 } from "@remix-run/react";
-import io, {type Socket} from "socket.io-client";
 import {SocketProvider} from "./socket";
 import { createGlobalStyle } from "styled-components";
 
@@ -44,22 +43,6 @@ const GlobalStyles = createGlobalStyle`
 `
 
 export default function App() {
-	const [socket, setSocket] = React.useState<Socket>();
-	React.useEffect(() => {
-		console.log("connecting");
-		const socket = io();
-		setSocket(socket);
-		return () => {
-			socket.close();
-		};
-	}, []);
-	React.useEffect(() => {
-		if (!socket) return;
-		socket.on("confirmation", (data) => {
-			console.log(data);
-		});
-	}, [socket]);
-
 	let location = useLocation();
 	let matches = useMatches();
 
@@ -113,7 +96,7 @@ export default function App() {
 			</head>
 			<body>
 				<GlobalStyles/>
-				<SocketProvider socket={socket}>
+				<SocketProvider>
 					<Outlet />
 				</SocketProvider>
 				<ScrollRestoration/>

@@ -28,13 +28,13 @@ const io = new Server(httpServer);
 // from a client
 io.on("connection", (socket) => {
   // from this point you are on the WS connection with a specific client
-  console.log(socket.id, "connected");
+  console.log(socket.id, "connected, youhou!");
 
   socket.emit("confirmation", "connected!");
 
-  socket.on("update", (listId) => {
+  socket.on("update", (listId, clientId) => {
       console.log("Broadcasting update!");
-      socket.broadcast.emit("update", listId);
+      socket.broadcast.emit("update", listId, clientId);
   });
 });
 

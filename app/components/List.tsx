@@ -153,6 +153,7 @@ const Row = ({item, provided, isDragging, isWaitingReorder, isWaitingDelete}: {i
 			$isWaitingDelete={!!waitingDelete}
 			$isSubList={isSubList}
 			$isDragging={isDragging || isWaitingReorder}
+			onPointerDown={() => (document.activeElement as HTMLElement | null)?.blur()}
 		>
 			<SItemText onClick={doCheck} $isCompleted={completed} $isWaiting={!!waitingEdit}>
 				{isEditing
@@ -273,11 +274,12 @@ const SBack = styled.span`
 
 const SMenuButton = styled.span`
 	font-size: 30px;
-	position: fixed;
+	position: absolute;
 	top: 5px;
 	right: 10px;
 	z-index: 1;
 	cursor: pointer;
+	-webkit-tap-highlight-color: transparent; // Disable blue highlight on tap on Android
 `
 
 const SMenu = styled.div`
@@ -289,10 +291,22 @@ const SMenu = styled.div`
 	z-index: 1;
 	border: 2px solid var(--primary);
 	outline: 1px solid var(--background);
-	border-radius: 15px;
+	border-radius: 10px;
 	font-size: 1.1rem;
 	line-height: 2rem;
-	padding: 0.35rem 0.5rem;
+	& div:first-of-type {
+		border-radius: 10px 10px 0 0
+	}
+	& div:last-of-type {
+		border-radius: 0 0 10px 10px
+	}
+`
+
+const SMenuItem = styled.div`
+	padding: 0.4rem 0.6rem;
+	&:hover {
+		background: #CCC;
+	}
 `
 
 const SBackdrop = styled.div`
@@ -346,9 +360,12 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 				<span onClick={openMenu}>{"\u2807"}</span>
 				{isOpen && (
 					<SMenu>
-						<span onClick={handleClean}>Nettoyer la liste</span>
-						<br/>
-						<Link to="/recentlyDeleted">Supprimés récemment</Link>
+						<SMenuItem onClick={handleClean}>
+							Nettoyer la liste
+						</SMenuItem>
+						<SMenuItem>
+							<Link to="/recentlyDeleted">Supprimés récemment</Link>
+						</SMenuItem>
 					</SMenu>
 				)}
 				{isOpen && <SBackdrop onClick={closeMenu}/>}

@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {
 	useLoaderData,
 	useSubmit,
@@ -27,7 +25,7 @@ export default function ListPage() {
 	const listId = params["listId"];
 	let list = useLoaderData<typeof loader>();
 
-	useReloadOnUpdate(listId);
+	useReloadOnUpdate(listId || "");
 
 	// Create root list
 	const submit = useSubmit();
