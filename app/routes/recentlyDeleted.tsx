@@ -18,7 +18,7 @@ export const action = async () => {
 export default function ListPage() {
 	let items = useLoaderData<typeof loader>();
 
-	useReloadOnUpdate();
+	useReloadOnUpdate("");
 
 	return <RecentlyDeletedList items={items} isLoading={false}/>;
 }
