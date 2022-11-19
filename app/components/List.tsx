@@ -146,14 +146,14 @@ const Row = ({item, provided, isDragging, isWaitingReorder, isWaitingDelete}: {i
 	return (
 		<SRow
 			ref={provided.innerRef}
-			{...provided.draggableProps}
-			{...provided.dragHandleProps}
+			{...isEditing ? {} : provided.draggableProps}
+			{...isEditing ? {} : provided.dragHandleProps}
 			$isCompleted={completed}
 			$isWaiting={!!waitingCheck}
 			$isWaitingDelete={!!waitingDelete}
 			$isSubList={isSubList}
 			$isDragging={isDragging || isWaitingReorder}
-			onPointerDown={() => (document.activeElement as HTMLElement | null)?.blur()}
+			onPointerDown={() => isEditing || (document.activeElement as HTMLElement | null)?.blur()}
 		>
 			<SItemText onClick={doCheck} $isCompleted={completed} $isWaiting={!!waitingEdit}>
 				{isEditing
