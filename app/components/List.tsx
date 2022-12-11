@@ -11,6 +11,7 @@ import styled from "styled-components";
 import Edit from "./Edit";
 import Delete from "./Delete";
 import Undo from "./Undo";
+import {flag, Lang, supportedLanguages, useSetLanguage, useTranslate} from "~/translation";
 
 const DeleteButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
 	return <Delete onClick={onClick} $isCompleted={$isCompleted}/>
@@ -189,6 +190,7 @@ const SInput = styled.input`
 `;
 
 const AddItem = () => {
+	const {t} = useTranslate();
 	const params = useParams();
 	const listId = params.listId as string;
 	const [text, setText] = React.useState("");
@@ -217,7 +219,7 @@ const AddItem = () => {
 				<SInput
 					type="text"
 					enterKeyHint="done"
-					placeholder="Ajouter…"
+					placeholder={t("add")}
 					value={text}
 					onChange={handleChange}
 					onKeyDown={handleKeyDown}
@@ -275,7 +277,7 @@ const SBack = styled.span`
 const SMenuButton = styled.span`
 	font-size: 30px;
 	position: absolute;
-	top: 5px;
+	top: 10px;
 	right: 10px;
 	z-index: 1;
 	cursor: pointer;
@@ -294,16 +296,37 @@ const SMenu = styled.div`
 	border-radius: 10px;
 	font-size: 1.1rem;
 	line-height: 2rem;
-	& div:first-of-type {
+	& > div:first-of-type {
 		border-radius: 10px 10px 0 0
 	}
-	& div:last-of-type {
+	& > div:last-of-type {
 		border-radius: 0 0 10px 10px
 	}
 `
 
 const SMenuItem = styled.div`
 	padding: 0.4rem 0.6rem;
+	&:hover {
+		background: #CCC;
+	}
+`
+
+const SFlagMenuItem = styled(SMenuItem)`
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	&:hover {
+		background: none;
+	}
+`
+
+const SFlag = styled.div<{$isSelected: boolean}>`
+	flex-grow: 1;
+	text-align: center;
+	border-radius: 5px;
+	${props => props.$isSelected && `
+		border: 2px solid black;
+	`}
 	&:hover {
 		background: #CCC;
 	}
@@ -320,6 +343,8 @@ const SBackdrop = styled.div`
 `
 
 const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
+	const {t, lang} = useTranslate();
+
 	const [waiting, doRename] = useOptimisticAction(
 		(value: string) => {
 			setIsEditing(false);
@@ -351,6 +376,13 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 		doClean();
 	}
 
+	const setLanguage = useSetLanguage();
+
+	const handleSetLanguage = (lang: Lang) => () => {
+		setLanguage(lang);
+		closeMenu();
+	}
+
 	return (
 		<SHeader>
 			<SName $isWaiting={!!waiting}>
@@ -361,11 +393,16 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 				{isOpen && (
 					<SMenu>
 						<SMenuItem onClick={handleClean}>
-							Nettoyer la liste
+							{t("clearList")}
 						</SMenuItem>
 						<SMenuItem>
-							<Link to="/recentlyDeleted">Supprimés récemment</Link>
+							<Link to="/recentlyDeleted">{t("recentlyDeleted")}</Link>
 						</SMenuItem>
+						<SFlagMenuItem>
+							{supportedLanguages.map(thisLang => (
+								<SFlag $isSelected={thisLang == lang} onClick={handleSetLanguage(thisLang)}>{flag(thisLang)}</SFlag>
+							))}
+						</SFlagMenuItem>
 					</SMenu>
 				)}
 				{isOpen && <SBackdrop onClick={closeMenu}/>}
@@ -450,9 +487,12 @@ export type HalfList = {
 };
 
 const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
+	const navigate = useNavigate();
+	const {t} = useTranslate();
+
 	// TODO: optimistic ui
 	const [_ /*isWaitingAddSubList*/, handleAddSubList] = useOptimisticAction(
-		() => ({action: `${list.id}/add`, value: "Nouvelle liste", isSubList: "true"}),
+		() => ({action: `${list.id}/add`, value: t("newList"), isSubList: "true"}),
 		list.id,
 	);
 
@@ -498,12 +538,10 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 	);
 	const waitingIds = waitingClean && (waitingClean.ids as string).split(",");
 
-	const navigate = useNavigate();
-
 	return (
 		<DragDropContext onDragEnd={handleDragEnd}>
 			<SMain $isLoading={isLoading}>
-				{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>Retour</SBack>}
+				{list.parent && <SBack onClick={() => list.parent && navigate(`/${list.parent.listId}`)}><BackThing/>{t("back")}</SBack>}
 				<Header list={list} doClean={doClean}/>
 				<Droppable droppableId={list.id}>
 					{provided => (
@@ -596,23 +634,24 @@ const SDateHeader = styled.div`
 	}
 `;
 
-const getDateHeader = (from: HalfItem | undefined, to: HalfItem) => {
-	if (!to.deletedAt) throw new Error("error");
-	if (from && !from.deletedAt) throw new Error("error");
-	const options = {day: "numeric", month: "long", hour: "numeric", minute: "numeric"} as const;
-	const strTo = new Intl.DateTimeFormat("fr-FR", options).format(new Date(to.deletedAt));
-	const strFrom = from && from.deletedAt ? new Intl.DateTimeFormat("fr-FR", options).format(new Date(from.deletedAt)) : "";
-	return strTo === strFrom ? null : `(le ${strTo})`;
-};
-
 export const RecentlyDeletedList = ({items, isLoading}: {items: HalfItem[], isLoading: boolean}) => {
 	const navigate = useNavigate();
+	const {t} = useTranslate();
+
+	const getDateHeader = (from: HalfItem | undefined, to: HalfItem) => {
+		if (!to.deletedAt) throw new Error("error");
+		if (from && !from.deletedAt) throw new Error("error");
+		const options = {day: "numeric", month: "long", hour: "numeric", minute: "numeric"} as const;
+		const strTo = new Intl.DateTimeFormat(t("locale"), options).format(new Date(to.deletedAt));
+		const strFrom = from && from.deletedAt ? new Intl.DateTimeFormat(t("locale"), options).format(new Date(from.deletedAt)) : "";
+		return strTo === strFrom ? null : `(${t("date").replace("%s", strTo)})`;
+	};
 
 	return (
 		<SMain $isLoading={isLoading} $primaryColor="#444">
-			<SBack onClick={() => navigate("/")}><BackThing/>Retour</SBack>
+			<SBack onClick={() => navigate("/")}><BackThing/>{t("back")}</SBack>
 			<SHeader>
-				<SName $isWaiting={false}>Supprimés récemment</SName>
+				<SName $isWaiting={false}>{t("recentlyDeleted")}</SName>
 			</SHeader>
 			<SMainList>
 				{items.map((item, i) => (

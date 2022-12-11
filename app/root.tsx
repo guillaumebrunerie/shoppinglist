@@ -12,6 +12,7 @@ import {
 } from "@remix-run/react";
 import {SocketProvider} from "./socket";
 import { createGlobalStyle } from "styled-components";
+import { LangProvider } from "./translation";
 
 let isMount = true;
 
@@ -97,7 +98,9 @@ export default function App() {
 			<body>
 				<GlobalStyles/>
 				<SocketProvider>
-					<Outlet />
+					<LangProvider>
+						<Outlet />
+					</LangProvider>
 				</SocketProvider>
 				<ScrollRestoration/>
 				<Scripts />

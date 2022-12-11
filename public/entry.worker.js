@@ -41,9 +41,12 @@ async function handleMessage(event) {
     ]);
     if (!existingDocument || !isMount) {
       debug("Caching document for", documentUrl);
-      cachePromises.set(documentUrl, documentCache.add(documentUrl).catch((error) => {
-        debug(`Failed to cache document for ${documentUrl}:`, error);
-      }));
+      cachePromises.set(
+        documentUrl,
+        documentCache.add(documentUrl).catch((error) => {
+          debug(`Failed to cache document for ${documentUrl}:`, error);
+        })
+      );
     }
     if (isMount) {
       for (const match of matches) {
@@ -55,9 +58,12 @@ async function handleMessage(event) {
           const url = location.pathname + search + location.hash;
           if (!cachePromises.has(url)) {
             debug("Caching data for", url);
-            cachePromises.set(url, dataCache.add(url).catch((error) => {
-              debug(`Failed to cache data for ${url}:`, error);
-            }));
+            cachePromises.set(
+              url,
+              dataCache.add(url).catch((error) => {
+                debug(`Failed to cache data for ${url}:`, error);
+              })
+            );
           }
         }
       }
@@ -99,10 +105,13 @@ async function handleFetch(event) {
         response.headers.set("X-Remix-Worker", "yes");
         return response;
       }
-      return json({ message: "Network Error" }, {
-        status: 500,
-        headers: { "X-Remix-Catch": "yes", "X-Remix-Worker": "yes" }
-      });
+      return json(
+        { message: "Network Error" },
+        {
+          status: 500,
+          headers: { "X-Remix-Catch": "yes", "X-Remix-Worker": "yes" }
+        }
+      );
     }
   }
   if (isDocumentGetRequest(event.request)) {
@@ -123,7 +132,7 @@ async function handleFetch(event) {
   }
   return fetch(event.request.clone());
 }
-var handlePush = (event) => {
+async function handlePush(event) {
   const data = JSON.parse(event == null ? void 0 : event.data.text());
   const title = data.title ? data.title : "Remix PWA";
   const options = {
@@ -137,7 +146,7 @@ var handlePush = (event) => {
   self.registration.showNotification(title, {
     ...options
   });
-};
+}
 function isMethod(request, methods) {
   return methods.includes(request.method.toLowerCase());
 }
@@ -164,21 +173,23 @@ self.addEventListener("push", (event) => {
   event.waitUntil(handlePush(event));
 });
 self.addEventListener("fetch", (event) => {
-  event.respondWith((async () => {
-    const result = {};
-    try {
-      result.response = await handleFetch(event);
-    } catch (error) {
-      result.error = error;
-    }
-    return appHandleFetch(event, result);
-  })());
+  event.respondWith(
+    (async () => {
+      const result = {};
+      try {
+        result.response = await handleFetch(event);
+      } catch (error) {
+        result.error = error;
+      }
+      return appHandleFetch(event, result);
+    })()
+  );
 });
 async function appHandleFetch(event, { error, response }) {
   return response;
 }
 /**
- * @remix-run/server-runtime v1.6.7
+ * @remix-run/server-runtime v1.8.2
  *
  * Copyright (c) Remix Software Inc.
  *
