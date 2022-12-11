@@ -11,7 +11,7 @@ import styled from "styled-components";
 import Edit from "./Edit";
 import Delete from "./Delete";
 import Undo from "./Undo";
-import {flag, Lang, supportedLanguages, useSetLanguage, useTranslate} from "~/translation";
+import {type Lang, flag, supportedLanguages, useSetLanguage, useTranslate} from "~/translation";
 
 const DeleteButton = ({onClick, $isCompleted}: {onClick: () => void, $isCompleted: boolean}) => {
 	return <Delete onClick={onClick} $isCompleted={$isCompleted}/>
@@ -396,11 +396,11 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 							{t("clearList")}
 						</SMenuItem>
 						<SMenuItem>
-							<Link to="/recentlyDeleted">{t("recentlyDeleted")}</Link>
+							<Link to="recentlyDeleted">{t("recentlyDeleted")}</Link>
 						</SMenuItem>
 						<SFlagMenuItem>
 							{supportedLanguages.map(thisLang => (
-								<SFlag $isSelected={thisLang == lang} onClick={handleSetLanguage(thisLang)}>{flag(thisLang)}</SFlag>
+								<SFlag key={thisLang} $isSelected={thisLang == lang} onClick={handleSetLanguage(thisLang)}>{flag(thisLang)}</SFlag>
 							))}
 						</SFlagMenuItem>
 					</SMenu>
@@ -491,7 +491,7 @@ const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
 	const {t} = useTranslate();
 
 	// TODO: optimistic ui
-	const [_ /*isWaitingAddSubList*/, handleAddSubList] = useOptimisticAction(
+	const [/*isWaitingAddSubList*/, handleAddSubList] = useOptimisticAction(
 		() => ({action: `${list.id}/add`, value: t("newList"), isSubList: "true"}),
 		list.id,
 	);
@@ -634,7 +634,7 @@ const SDateHeader = styled.div`
 	}
 `;
 
-export const RecentlyDeletedList = ({items, isLoading}: {items: HalfItem[], isLoading: boolean}) => {
+export const RecentlyDeletedList = ({items, listId, isLoading}: {items: HalfItem[], listId: string, isLoading: boolean}) => {
 	const navigate = useNavigate();
 	const {t} = useTranslate();
 
@@ -649,7 +649,7 @@ export const RecentlyDeletedList = ({items, isLoading}: {items: HalfItem[], isLo
 
 	return (
 		<SMain $isLoading={isLoading} $primaryColor="#444">
-			<SBack onClick={() => navigate("/")}><BackThing/>{t("back")}</SBack>
+			<SBack onClick={() => navigate(`/${listId}`)}><BackThing/>{t("back")}</SBack>
 			<SHeader>
 				<SName $isWaiting={false}>{t("recentlyDeleted")}</SName>
 			</SHeader>

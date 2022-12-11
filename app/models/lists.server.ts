@@ -52,10 +52,11 @@ export const getList = async (id: string): Promise<FullList | null> => {
 	});
 };
 
-export const getDeletedItems = async () => {
+export const getDeletedItems = async (listId: string) => {
 	return await prisma.item.findMany({
 		where: {
 			deletedAt: {not: null},
+			listId,
 		},
 		orderBy: {
 			deletedAt: "desc",

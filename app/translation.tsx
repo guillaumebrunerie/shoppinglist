@@ -61,13 +61,13 @@ const getSavedLanguage = (): Lang | null => {
 
 export const LangProvider = ({ children }: ProviderProps) => {
 	const langState = React.useState<Lang>(getSavedLanguage() || "fr");
+	const [, setLang] = langState;
 	React.useEffect(() => {
-		const [, setLang] = langState;
 		const savedLanguage = localStorage.getItem("lang");
 		if (savedLanguage && supportedLanguages.includes(savedLanguage as Lang)) {
 			setLang(savedLanguage as Lang);
 		}
-	}, []);
+	}, [setLang]);
 	return <context.Provider value={langState}>{children}</context.Provider>;
 };
 
