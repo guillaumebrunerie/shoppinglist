@@ -431,13 +431,14 @@ const BackThing = () => (
 
 const SSubList = styled.svg`
 	position: fixed;
-	bottom: 1.5rem;
-	right: 1rem;
-	height: 3rem;
-	width: 3rem;
+	bottom: 0.9rem;
+	right: 0.4rem;
+	height: 3.6rem;
+	width: 3.6rem;
 	flex: none;
 	cursor: pointer;
-	stroke: none;
+	stroke: var(--background);
+	stroke-width: 5px;
 	fill: var(--primary);
 	path {
 		stroke: var(--background);
@@ -459,7 +460,7 @@ const SMain = styled.main<{$isLoading: boolean, $primaryColor?: string, $backgro
 `;
 
 const AddSubListSVG = (props: {onClick: () => void}) => (
-	<SSubList viewBox="0 0 100 100" {...props}>
+	<SSubList viewBox="-10 -10 120 120" {...props}>
 		<circle cx="50" cy="50" r="50"/>
 		<path d="M 50 25 L 50 75 M 25 50 L 75 50"/>
 	</SSubList>
