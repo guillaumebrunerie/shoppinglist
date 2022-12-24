@@ -344,6 +344,7 @@ const SBackdrop = styled.div`
 
 const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 	const {t, lang} = useTranslate();
+	const navigate = useNavigate();
 
 	const [waiting, doRename] = useOptimisticAction(
 		(value: string) => {
@@ -376,6 +377,11 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 		doClean();
 	}
 
+	const handleBackToAllLists = () => {
+		localStorage.removeItem("lastList");
+		navigate("/", {replace: true});
+	}
+
 	const setLanguage = useSetLanguage();
 
 	const handleSetLanguage = (lang: Lang) => () => {
@@ -392,6 +398,9 @@ const Header = ({list, doClean}: {list: HalfList, doClean: () => void}) => {
 				<span onClick={openMenu}>{"\u2807"}</span>
 				{isOpen && (
 					<SMenu>
+						<SMenuItem onClick={handleBackToAllLists}>
+							{t("backToAllLists")}
+						</SMenuItem>
 						<SMenuItem onClick={handleClean}>
 							{t("clearList")}
 						</SMenuItem>
@@ -487,7 +496,7 @@ export type HalfList = {
 	items: HalfItem[],
 };
 
-const List = ({list, isLoading}: {list: HalfList, isLoading: boolean}) => {
+const List = ({list, isLoading = false}: {list: HalfList, isLoading?: boolean}) => {
 	const navigate = useNavigate();
 	const {t} = useTranslate();
 

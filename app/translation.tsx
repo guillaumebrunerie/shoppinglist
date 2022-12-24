@@ -29,6 +29,16 @@ const translations = {
 		en: "Back",
 		ru: "Обратно",
 	},
+	backToAllLists: {
+		fr: "Retourner à mes listes",
+		en: "Back to my lists",
+		ru: "TODO", // TODO
+	},
+	allMyLists: {
+		fr: "Mes listes de listes",
+		en: "My lists of lists",
+		ru: "TODO", // TODO
+	},
 	locale: {
 		fr: "fr-FR",
 		en: "en-US",

@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
 	useLoaderData,
 	useSubmit,
@@ -20,12 +21,37 @@ export const action = async () => {
 	return json({})
 };
 
+const localStorageApply = <T,>(key: string, def: T, f: (value: T) => T): T => {
+	const valueStr = localStorage.getItem(key);
+	let value = def;
+	try {
+		if (valueStr !== null) {
+			value = JSON.parse(valueStr) as T;
+		}
+	} catch (e) {}
+	const newValue = f(value);
+	localStorage.setItem(key, JSON.stringify(newValue));
+	return newValue;
+}
+
 export default function ListPage() {
 	const params = useParams();
-	const listId = params["listId"];
+	const listId = params["listId"] as string;
 	let list = useLoaderData<typeof loader>();
 
 	useReloadOnUpdate(listId || "");
+
+	React.useEffect(() => {
+		localStorage.setItem("lastList", listId);
+		if (list && !list.parent) {
+			localStorageApply("allLists", [], (allLists: string[]) => {
+				if (!allLists.includes(listId)) {
+					allLists.push(listId);
+				}
+				return allLists;
+			});
+		}
+	}, [list, listId]);
 
 	// Create root list
 	const submit = useSubmit();
@@ -36,7 +62,6 @@ export default function ListPage() {
 	// Go back to the screen for choosing root list
 	const navigate = useNavigate();
 	const handleCancel = () => {
-		localStorage.removeItem("rootList");
 		navigate(`/`);
 	};
 
