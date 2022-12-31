@@ -18,6 +18,15 @@ export let loader: LoaderFunction = () => {
           type: "image/png",
         },
       ],
+      share_target: {
+        action: "/share/",
+        method: "GET",
+        params: {
+          title: "name",
+          text: "description",
+          url: "link",
+        },
+      },
     },
     {
       headers: {
